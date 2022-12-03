@@ -46,11 +46,33 @@ dbWrapper
         );
         
         await db.run(
-          "CREATE TABLE AcademicHistory (" +
+          "CREATE TABLE ImageRecord (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
-            "major TEXT, "+
-            "type TEXT, "+
-            "yearConferred INTEGER)"
+            "source TEXT, "+
+            "alt TEXT "+
+        ")"
+        );
+        
+        await db.run(
+          "CREATE TABLE Hobby (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
+            "title TEXT, "+
+            "description TEXT, "+
+            "degreeDescription TEXT, "+
+            "FOREIGN KEY(institutionImage) REFERENCES ImageRecord(id)" +
+        ")"
+        );
+        
+        await db.run(
+          "CREATE TABLE AcademicRecord (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
+            "timePeriod TEXT, "+
+            "institutionImage INTEGER, "+
+            "degreeLink TEXT, "+
+            "degreeTitle TEXT, "+
+            "degreeDescription TEXT, "+
+            "FOREIGN KEY(institutionImage) REFERENCES ImageRecord(id)" +
+        ")"
         );
       } else {
         // We have a database already - write Choices records to log for info
