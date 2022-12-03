@@ -64,6 +64,16 @@ dbWrapper
         );
         
         await db.run(
+          "CREATE TABLE SocialItem (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
+            "title TEXT, "+
+            "linkPage TEXT, "+
+            "socialImage INTEGER, "+
+            "FOREIGN KEY(socialImage) REFERENCES ImageRecord(id)" +
+        ")"
+        );
+        
+        await db.run(
           "CREATE TABLE AcademicRecord (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
             "timePeriod TEXT, "+
@@ -72,6 +82,17 @@ dbWrapper
             "degreeTitle TEXT, "+
             "degreeDescription TEXT, "+
             "FOREIGN KEY(institutionImage) REFERENCES ImageRecord(id)" +
+        ")"
+        );
+        
+        await db.run(
+          "CREATE TABLE WorkRecord (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
+            "timePeriod TEXT, "+
+            "companyImage INTEGER, "+
+            "position TEXT, "+
+            "description TEXT, "+
+            "FOREIGN KEY(companyImage) REFERENCES ImageRecord(id)" +
         ")"
         );
       } else {
