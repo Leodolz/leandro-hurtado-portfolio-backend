@@ -166,17 +166,14 @@ module.exports = {
   processAcademicRecord: async academicRecord => {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
+      
         // Build the user data from the front-end and the current time into the sql query
         await db.run("INSERT INTO AcademicRecord (timePeriod, degreeLink, degreeTitle, degreeDescription) VALUES (?, ?, ?, ?)", [
-          academicRecord.,
-          new Date().toISOString()
+          academicRecord.timePeriod,
+          academicRecord.degreeLink,
+          academicRecord.degreeTitle,
+          academicRecord.degreeDescription
         ]);
-
-        // Update the number of times the choice has been picked by adding one to it
-        await db.run(
-          "UPDATE Choices SET picks = picks + 1 WHERE language = ?",
-          vote
-        );
 
       // Return the choices so far - page will build these into a chart
       return await db.all("SELECT * from Choices");
