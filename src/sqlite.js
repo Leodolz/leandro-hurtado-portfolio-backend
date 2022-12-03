@@ -44,6 +44,14 @@ dbWrapper
         await db.run(
           "CREATE TABLE Log (id INTEGER PRIMARY KEY AUTOINCREMENT, choice TEXT, time STRING)"
         );
+        
+        await db.run(
+          "CREATE TABLE AcademicHistory (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
+            "major TEXT, "+
+            "type TEXT, "+
+            "yearConferred INTEGER)"
+        );
       } else {
         // We have a database already - write Choices records to log for info
         console.log(await db.all("SELECT * from Choices"));
