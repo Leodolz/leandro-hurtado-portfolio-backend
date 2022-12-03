@@ -58,8 +58,8 @@ dbWrapper
             "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
             "title TEXT, "+
             "description TEXT, "+
-            "degreeDescription TEXT, "+
-            "FOREIGN KEY(institutionImage) REFERENCES ImageRecord(id)" +
+            "hobbyImage INTEGER, "+
+            "FOREIGN KEY(hobbyImage) REFERENCES ImageRecord(id)" +
         ")"
         );
         
