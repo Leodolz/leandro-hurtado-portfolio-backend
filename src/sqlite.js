@@ -131,11 +131,14 @@ module.exports = {
     try {
       let records = await db.all("SELECT * from AcademicRecord");
       return await records.map(async (record) => {
-        let image = await db.get("SELECT * from ImageRecord WHERE id = ?", [record.institutionImage]);
+        let image = await db.get("SELECT (source, alt) from ImageRecord WHERE id = ?", [record.institutionImage]);
         return {
           timePeriod: record.timePeriod,
-          image: {
-            source: ,
+          image: image,
+          degree: {
+            link : record.degreeLink,
+            title: record.degreeTitle,
+            description: record.degreeDescription
           }
         }
       });
