@@ -126,12 +126,15 @@ module.exports = {
     }
   },
   
+  
+  
   getAcademicRecords: async () => {
     // We use a try catch block in case of db errors
     try {
       let records = await db.all("SELECT * from AcademicRecord");
-      return await records.map(async (record) => {
-        let image = await db.get("SELECT (source, alt) from ImageRecord WHERE id = ?", [record.institutionImage]);
+      return await Promise.all(records.map(async (record) => {
+        let image = await db.get("SELECT source, alt from ImageRecord WHERE id = ?", [record.institutionImage]);
+        console.log(image);
         return {
           timePeriod: record.timePeriod,
           image: image,
@@ -141,7 +144,7 @@ module.exports = {
             description: record.degreeDescription
           }
         }
-      });
+      }));
     } catch (dbError) {
       // Database connection error
       console.error(dbError);
