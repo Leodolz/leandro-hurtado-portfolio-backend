@@ -190,8 +190,39 @@ module.exports = {
         return {
           title: record.title,
           description: record.description,
+          image
         }
       }));
+    } catch (dbError) {
+      // Database connection error
+      console.error(dbError);
+      return dbError;
+    }
+  },
+  
+  getSocialItems: async () => {
+    // We use a try catch block in case of db errors
+    try {
+      let records = await db.all("SELECT * from SocialItem");
+      return await Promise.all(records.map(async (record) => {
+        let image = await this.getImage(record.socialImage);
+        return {
+          title: record.title,
+          linkPage: record.linkPage,
+          image
+        }
+      }));
+    } catch (dbError) {
+      // Database connection error
+      console.error(dbError);
+      return dbError;
+    }
+  },
+  
+  getActivities: async () => {
+    // We use a try catch block in case of db errors
+    try {
+      return db.all("SELECT title, description from Activity");
     } catch (dbError) {
       // Database connection error
       console.error(dbError);

@@ -84,7 +84,7 @@ fastify.get("/academicRecords", async (request, reply) => {
   Params is the data we pass to the client
   - SEO values for front-end UI but not for raw data
   */
-  let params = request.query.raw ? {} : { seo: seo };
+  let params = {};
 
   // Get the available choices from the database
   const records = await db.getAcademicRecords();
@@ -95,9 +95,83 @@ fastify.get("/academicRecords", async (request, reply) => {
   else params.error = data.errorMessage;
 
   // Send the page options or raw JSON data if the client requested it
-  return request.query.raw
-    ? reply.send(params)
-    : reply.view("/src/pages/index.hbs", params);
+  return reply.send(params);
+});
+
+fastify.get("/workRecords", async (request, reply) => {
+  /* 
+  Params is the data we pass to the client
+  - SEO values for front-end UI but not for raw data
+  */
+  let params = {};
+
+  // Get the available choices from the database
+  const records = await db.getWorkRecords();
+  if (records) {
+    params = records;
+  }
+  // Let the user know if there was a db error
+  else params.error = data.errorMessage;
+
+  // Send the page options or raw JSON data if the client requested it
+  return reply.send(params);
+});
+
+fastify.get("/hobbies", async (request, reply) => {
+  /* 
+  Params is the data we pass to the client
+  - SEO values for front-end UI but not for raw data
+  */
+  let params = {};
+
+  // Get the available choices from the database
+  const records = await db.getHobbies();
+  if (records) {
+    params = records;
+  }
+  // Let the user know if there was a db error
+  else params.error = data.errorMessage;
+
+  // Send the page options or raw JSON data if the client requested it
+  return reply.send(params);
+});
+
+fastify.get("/activities", async (request, reply) => {
+  /* 
+  Params is the data we pass to the client
+  - SEO values for front-end UI but not for raw data
+  */
+  let params = {};
+
+  // Get the available choices from the database
+  const records = await db.getThingsToDo();
+  if (records) {
+    params = records;
+  }
+  // Let the user know if there was a db error
+  else params.error = data.errorMessage;
+
+  // Send the page options or raw JSON data if the client requested it
+  return reply.send(params);
+});
+
+fastify.get("/socialItems", async (request, reply) => {
+  /* 
+  Params is the data we pass to the client
+  - SEO values for front-end UI but not for raw data
+  */
+  let params = {};
+
+  // Get the available choices from the database
+  const records = await db.getSocialItems();
+  if (records) {
+    params = records;
+  }
+  // Let the user know if there was a db error
+  else params.error = data.errorMessage;
+
+  // Send the page options or raw JSON data if the client requested it
+  return reply.send(params);
 });
 
 /**
@@ -141,7 +215,7 @@ fastify.post("/", async (request, reply) => {
  */
 fastify.post("/academicRecord", async (request, reply) => {
   // We only send seo if the client is requesting the front-end ui
-  let params = request.query.raw ? {} : { seo: seo };
+  let params = {};
 
   // Flag to indicate we want to show the poll results instead of the poll form
   params.results = true;
@@ -155,9 +229,7 @@ fastify.post("/academicRecord", async (request, reply) => {
   }
 
   // Return the info to the client
-  return request.query.raw
-    ? records
-    : reply.view("/src/pages/index.hbs", params);
+  return records;
 });
 
 /**
