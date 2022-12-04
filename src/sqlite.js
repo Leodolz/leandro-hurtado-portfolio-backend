@@ -21,9 +21,9 @@ We're using the sqlite wrapper so that we can make async / await connections
 dbWrapper
   .open({
     filename: dbFile,
-    driver: sqlite3.Database
+    driver: sqlite3.Database,
   })
-  .then(async dBase => {
+  .then(async (dBase) => {
     db = dBase;
 
     // We use try and catch blocks throughout to handle any database errors
@@ -44,56 +44,56 @@ dbWrapper
         await db.run(
           "CREATE TABLE Log (id INTEGER PRIMARY KEY AUTOINCREMENT, choice TEXT, time STRING)"
         );
-        
+
         await db.run(
           "CREATE TABLE ImageRecord (" +
-            "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
-            "source TEXT, "+
-            "alt TEXT "+
-        ")"
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "source TEXT UNIQUE, " +
+            "alt TEXT " +
+            ")"
         );
-        
+
         await db.run(
           "CREATE TABLE Hobby (" +
-            "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
-            "title TEXT, "+
-            "description TEXT, "+
-            "hobbyImage INTEGER, "+
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "title TEXT, " +
+            "description TEXT, " +
+            "hobbyImage INTEGER, " +
             "FOREIGN KEY(hobbyImage) REFERENCES ImageRecord(id)" +
-        ")"
+            ")"
         );
-        
+
         await db.run(
           "CREATE TABLE SocialItem (" +
-            "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
-            "title TEXT, "+
-            "linkPage TEXT, "+
-            "socialImage INTEGER, "+
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "title TEXT, " +
+            "linkPage TEXT, " +
+            "socialImage INTEGER, " +
             "FOREIGN KEY(socialImage) REFERENCES ImageRecord(id)" +
-        ")"
+            ")"
         );
-        
+
         await db.run(
           "CREATE TABLE AcademicRecord (" +
-            "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
-            "timePeriod TEXT, "+
-            "institutionImage INTEGER, "+
-            "degreeLink TEXT, "+
-            "degreeTitle TEXT, "+
-            "degreeDescription TEXT, "+
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "timePeriod TEXT, " +
+            "institutionImage INTEGER, " +
+            "degreeLink TEXT, " +
+            "degreeTitle TEXT, " +
+            "degreeDescription TEXT, " +
             "FOREIGN KEY(institutionImage) REFERENCES ImageRecord(id)" +
-        ")"
+            ")"
         );
-        
+
         await db.run(
           "CREATE TABLE WorkRecord (" +
-            "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
-            "timePeriod TEXT, "+
-            "companyImage INTEGER, "+
-            "position TEXT, "+
-            "description TEXT, "+
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "timePeriod TEXT, " +
+            "companyImage INTEGER, " +
+            "position TEXT, " +
+            "description TEXT, " +
             "FOREIGN KEY(companyImage) REFERENCES ImageRecord(id)" +
-        ")"
+            ")"
         );
       } else {
         // We have a database already - write Choices records to log for info
@@ -109,7 +109,6 @@ dbWrapper
 
 // Our server script will call these methods to connect to the db
 module.exports = {
-  
   /**
    * Get the options in the database
    *
@@ -134,7 +133,7 @@ module.exports = {
    * Find and update the chosen option
    * Return the updated list of votes
    */
-  processVote: async vote => {
+  processVote: async (vote) => {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
       // Check the vote is valid
@@ -146,7 +145,7 @@ module.exports = {
         // Build the user data from the front-end and the current time into the sql query
         await db.run("INSERT INTO Log (choice, time) VALUES (?, ?)", [
           vote,
-          new Date().toISOString()
+          new Date().toISOString(),
         ]);
 
         // Update the number of times the choice has been picked by adding one to it
@@ -162,22 +161,41 @@ module.exports = {
       console.error(dbError);
     }
   },
-  
-  processAcademicRecord: async academicRecord => {
+
+  processAcademicRecord: async (academicRecord) => {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
-      
-      
-        // Build the user data from the front-end and the current time into the sql query
-        await db.run("INSERT INTO AcademicRecord (timePeriod, degreeLink, degreeTitle, degreeDescription) VALUES (?, ?, ?, ?)", [
-          academicRecord.timePeriod,
-          academicRecord.degreeLink,
-          academicRecord.degreeTitle,
-          academicRecord.degreeDescription
-        ]);
+      const existingImages = await db.all(
+        "SELECT * from ImageRecord WHERE source = ?",
+        academicRecord.imageSource
+      );
+      if (existingImages.length > 0) {
+        return {
+          errorMessage: "Image source already exists!",
+          errorArgument: academicRecord.imageSource,
+        };
+      }
+      await db.run("INSERT INTO ImageRecord(source, alt) VALUES (?,?)", [
+        academicRecord.imageSource,
+        academicRecord.imageAlt,
+        async function (err) {
+          await db.run(
+            "INSERT INTO AcademicRecord (timePeriod, degreeLink, degreeTitle, degreeDescription, institutionImage) VALUES (?, ?, ?, ?, ?)",
+            [
+              academicRecord.timePeriod,
+              academicRecord.degreeLink,
+              academicRecord.degreeTitle,
+              academicRecord.degreeDescription,
+              this.lastId,
+            ]
+          );
+        },
+      ]);
+
+      // Build the user data from the front-end and the current time into the sql query
 
       // Return the choices so far - page will build these into a chart
-      return await db.all("SELECT * from Choices");
+      return await db.all("SELECT * from AcademicRecord");
     } catch (dbError) {
       console.error(dbError);
     }
@@ -217,5 +235,5 @@ module.exports = {
     } catch (dbError) {
       console.error(dbError);
     }
-  }
+  },
 };

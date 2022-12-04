@@ -112,6 +112,32 @@ fastify.post("/", async (request, reply) => {
 });
 
 /**
+ * Post route to process user vote
+ *
+ * Retrieve vote from body data
+ * Send vote to database helper
+ * Return updated list of votes
+ */
+fastify.post("/academicRecord", async (request, reply) => {
+  // We only send seo if the client is requesting the front-end ui
+  let params = request.query.raw ? {} : { seo: seo };
+
+  // Flag to indicate we want to show the poll results instead of the poll form
+  params.results = true;
+  let records;
+
+  // We have a vote - send to the db helper to process and return results
+  if (Object.keys(request.body).length > 0) {
+    records = await db.processAcademicRecord(request.body);
+  }
+
+  // Return the info to the client
+  return request.query.raw
+    ? reply.send(records)
+    : reply.view("/src/pages/index.hbs", params);
+});
+
+/**
  * Admin endpoint returns log of votes
  *
  * Send raw json or the admin handlebars page
