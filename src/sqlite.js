@@ -258,10 +258,10 @@ module.exports = {
         workRecord.imageSource
       );
       if (existingImages.length > 0) {
-        console.error(`Image source already exists: ${academicRecord.imageSource}`);
+        console.error(`Image source already exists: ${workRecord.imageSource}`);
         return {
           errorMessage: "Image source already exists!",
-          errorArgument: academicRecord.imageSource,
+          errorArgument: workRecord.imageSource,
         };
       }
       await db.run("INSERT INTO ImageRecord(source, alt) VALUES (?, ?)", [
