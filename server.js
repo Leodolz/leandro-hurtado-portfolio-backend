@@ -79,6 +79,27 @@ fastify.get("/", async (request, reply) => {
     : reply.view("/src/pages/index.hbs", params);
 });
 
+fastify.get("/academicRecords", async (request, reply) => {
+  /* 
+  Params is the data we pass to the client
+  - SEO values for front-end UI but not for raw data
+  */
+  let params = request.query.raw ? {} : { seo: seo };
+
+  // Get the available choices from the database
+  const records = await db.getAcademicRecords();
+  if (records) {
+    params = records;
+  }
+  // Let the user know if there was a db error
+  else params.error = data.errorMessage;
+
+  // Send the page options or raw JSON data if the client requested it
+  return request.query.raw
+    ? reply.send(params)
+    : reply.view("/src/pages/index.hbs", params);
+});
+
 /**
  * Post route to process user vote
  *

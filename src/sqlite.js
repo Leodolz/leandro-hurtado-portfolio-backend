@@ -124,6 +124,16 @@ module.exports = {
       console.error(dbError);
     }
   },
+  
+  getAcademicRecords: async () => {
+    // We use a try catch block in case of db errors
+    try {
+      return await db.all("SELECT * from AcademicRecord");
+    } catch (dbError) {
+      // Database connection error
+      console.error(dbError);
+    }
+  },
 
   /**
    * Process a user vote
@@ -170,6 +180,7 @@ module.exports = {
         academicRecord.imageSource
       );
       if (existingImages.length > 0) {
+        console.error(`Image source already exists: ${academicRecord.imageSource}`);
         return {
           errorMessage: "Image source already exists!",
           errorArgument: academicRecord.imageSource,
