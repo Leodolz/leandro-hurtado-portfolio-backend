@@ -167,6 +167,7 @@ module.exports = {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
       
+      
         // Build the user data from the front-end and the current time into the sql query
         await db.run("INSERT INTO AcademicRecord (timePeriod, degreeLink, degreeTitle, degreeDescription) VALUES (?, ?, ?, ?)", [
           academicRecord.timePeriod,
