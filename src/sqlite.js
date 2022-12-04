@@ -205,30 +205,35 @@ module.exports = {
       console.error(dbError);
     }
   },
+  
+  processImage: async (imageRecord) => {
+    const existingImages = await db.all(
+        "SELECT * from ImageRecord WHERE source = ?",
+        imageRecord.imageSource
+      );
+      if (existingImages.length > 0) {
+        console.error(`Image source already exists: ${imageRecord.imageSource}`);
+        return {
+          errorMessage: "Image source already exists!",
+          errorArgument: imageRecord.imageSource,
+        };
+      }
+      await db.run("INSERT INTO ImageRecord(source, alt) VALUES (?, ?)", [
+        imageRecord.imageSource,
+        imageRecord.imageAlt]
+      );
+      
+      let image = await db.get("SELECT id FROM ImageRecord WHERE source= ?", [imageRecord.imageSource]);
+  },
 
   processAcademicRecord: async (academicRecord) => {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
-      const existingImages = await db.all(
-        "SELECT * from ImageRecord WHERE source = ?",
-        academicRecord.imageSource
-      );
-      if (existingImages.length > 0) {
-        console.error(`Image source already exists: ${academicRecord.imageSource}`);
-        return {
-          errorMessage: "Image source already exists!",
-          errorArgument: academicRecord.imageSource,
-        };
+      
+      let image = await this.processImage(academicRecord);
+      if(image.hasOwnProperty("errorMessage")) {
+        return image;
       }
-      await db.run("INSERT INTO ImageRecord(source, alt) VALUES (?, ?)", [
-        academicRecord.imageSource,
-        academicRecord.imageAlt]
-      );
-      
-      let image = await db.get("SELECT id FROM ImageRecord WHERE source= ?", [academicRecord.imageSource]);
-      
-      console.log(image);
-      
       await db.run(
             "INSERT INTO AcademicRecord (timePeriod, degreeLink, degreeTitle, degreeDescription, institutionImage) VALUES (?, ?, ?, ?, ?)",
             [
@@ -253,33 +258,16 @@ module.exports = {
   processWorkRecord: async (workRecord) => {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
-      const existingImages = await db.all(
-        "SELECT * from ImageRecord WHERE source = ?",
-        workRecord.imageSource
-      );
-      if (existingImages.length > 0) {
-        console.error(`Image source already exists: ${workRecord.imageSource}`);
-        return {
-          errorMessage: "Image source already exists!",
-          errorArgument: workRecord.imageSource,
-        };
+      let image = await this.processImage(workRecord);
+      if(image.hasOwnProperty("errorMessage")) {
+        return image;
       }
-      await db.run("INSERT INTO ImageRecord(source, alt) VALUES (?, ?)", [
-        academicRecord.imageSource,
-        academicRecord.imageAlt]
-      );
-      
-      let image = await db.get("SELECT id FROM ImageRecord WHERE source= ?", [academicRecord.imageSource]);
-      
-      console.log(image);
-      
       await db.run(
-            "INSERT INTO AcademicRecord (timePeriod, degreeLink, degreeTitle, degreeDescription, institutionImage) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO WorkRecord (timePeriod, position, description, companyImage) VALUES (?, ?, ?, ?)",
             [
-              academicRecord.timePeriod,
-              academicRecord.degreeLink,
-              academicRecord.degreeTitle,
-              academicRecord.degreeDescription,
+              workRecord.timePeriod,
+              workRecord.position,
+              workRecord.description,
               image.id,
             ]
           );
@@ -287,7 +275,59 @@ module.exports = {
       // Build the user data from the front-end and the current time into the sql query
 
       // Return the choices so far - page will build these into a chart
-      return await db.all("SELECT * from AcademicRecord");
+      return await db.all("SELECT * from WorkRecord");
+    } catch (dbError) {
+      console.error(dbError);
+      return dbError;
+    }
+  },
+  
+  processHobbyRecord: async (hobby) => {
+    // Insert new Log table entry indicating the user choice and timestamp
+    try {
+      let image = await this.processImage(hobby);
+      if(image.hasOwnProperty("errorMessage")) {
+        return image;
+      }
+      await db.run(
+            "INSERT INTO Hobby (title, description, hobbyImage) VALUES (?, ?, ?)",
+            [
+              hobby.title,
+              hobby.description,
+              image.id,
+            ]
+          );
+
+      // Build the user data from the front-end and the current time into the sql query
+
+      // Return the choices so far - page will build these into a chart
+      return await db.all("SELECT * from Hobby");
+    } catch (dbError) {
+      console.error(dbError);
+      return dbError;
+    }
+  },
+  
+  processSocialItem: async (socialItem) => {
+    // Insert new Log table entry indicating the user choice and timestamp
+    try {
+      let image = await this.processImage(socialItem);
+      if(image.hasOwnProperty("errorMessage")) {
+        return image;
+      }
+      await db.run(
+            "INSERT INTO SocialItem (title, linkPage, socialImage) VALUES (?, ?, ?)",
+            [
+              socialItem.title,
+              socialItem.linkPage,
+              image.id,
+            ]
+          );
+
+      // Build the user data from the front-end and the current time into the sql query
+
+      // Return the choices so far - page will build these into a chart
+      return await db.all("SELECT * from Hobby");
     } catch (dbError) {
       console.error(dbError);
       return dbError;
