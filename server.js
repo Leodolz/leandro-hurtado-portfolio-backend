@@ -150,11 +150,13 @@ fastify.post("/academicRecord", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
   if (Object.keys(request.body).length > 0) {
     records = await db.processAcademicRecord(request.body);
+  } else {
+    return request.body;
   }
 
   // Return the info to the client
   return request.query.raw
-    ? reply.send(records)
+    ? records
     : reply.view("/src/pages/index.hbs", params);
 });
 

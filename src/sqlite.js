@@ -104,6 +104,7 @@ dbWrapper
       }
     } catch (dbError) {
       console.error(dbError);
+      console.error("Hello");
     }
   });
 
@@ -132,6 +133,7 @@ module.exports = {
     } catch (dbError) {
       // Database connection error
       console.error(dbError);
+      return dbError;
     }
   },
 
@@ -209,6 +211,7 @@ module.exports = {
       return await db.all("SELECT * from AcademicRecord");
     } catch (dbError) {
       console.error(dbError);
+      return dbError;
     }
   },
 
