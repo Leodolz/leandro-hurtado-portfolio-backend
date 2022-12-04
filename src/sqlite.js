@@ -188,11 +188,13 @@ module.exports = {
           errorArgument: academicRecord.imageSource,
         };
       }
-      await db.run("INSERT INTO ImageRecord(source, alt) VALUES (?,?)", [
+      db.run("INSERT INTO ImageRecord(source, alt) VALUES (?, ?)", [
         academicRecord.imageSource,
-        academicRecord.imageAlt,
-        async function (err) {
-          await db.run(
+        academicRecord.imageAlt],
+        function (err) {
+          console.error(this);
+          console.error(db);
+          db.run(
             "INSERT INTO AcademicRecord (timePeriod, degreeLink, degreeTitle, degreeDescription, institutionImage) VALUES (?, ?, ?, ?, ?)",
             [
               academicRecord.timePeriod,
@@ -203,7 +205,7 @@ module.exports = {
             ]
           );
         },
-      ]);
+      );
 
       // Build the user data from the front-end and the current time into the sql query
 
