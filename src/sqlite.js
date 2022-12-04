@@ -52,11 +52,19 @@ dbWrapper
             "alt TEXT " +
             ")"
         );
+        
+        await db.run(
+          "CREATE TABLE Activity (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "title TEXT UNIQUE, " +
+            "description TEXT " +
+            ")"
+        );
 
         await db.run(
           "CREATE TABLE Hobby (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "title TEXT, " +
+            "title TEXT UNIQUE, " +
             "description TEXT, " +
             "hobbyImage INTEGER, " +
             "FOREIGN KEY(hobbyImage) REFERENCES ImageRecord(id)" +
@@ -66,7 +74,7 @@ dbWrapper
         await db.run(
           "CREATE TABLE SocialItem (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "title TEXT, " +
+            "title TEXT UNIQUE, " +
             "linkPage TEXT, " +
             "socialImage INTEGER, " +
             "FOREIGN KEY(socialImage) REFERENCES ImageRecord(id)" +
@@ -78,7 +86,7 @@ dbWrapper
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "timePeriod TEXT, " +
             "institutionImage INTEGER, " +
-            "degreeLink TEXT, " +
+            "degreeLink TEXT UNIQUE, " +
             "degreeTitle TEXT, " +
             "degreeDescription TEXT, " +
             "FOREIGN KEY(institutionImage) REFERENCES ImageRecord(id)" +
@@ -126,16 +134,21 @@ module.exports = {
     }
   },
   
+  getImage: async(imageId) => {
+    return await db.get("SELECT source, alt from ImageRecord WHERE id = ?", [imageId]);
+  },
+  
   getWorkRecords: async () => {
     // We use a try catch block in case of db errors
     try {
       let records = await db.all("SELECT * from WorkRecord");
       return await Promise.all(records.map(async (record) => {
-        let image = await db.get("SELECT source, alt from ImageRecord WHERE id = ?", [record.companyImage]);
-        console.log(image);
+        let image = await this.getImage(record.companyImage);
         return {
           image: image,
-          ...record
+          timePeriod: record.timePeriod,
+          position: record.position,
+          description: record.description
         }
       }));
     } catch (dbError) {
@@ -150,8 +163,7 @@ module.exports = {
     try {
       let records = await db.all("SELECT * from AcademicRecord");
       return await Promise.all(records.map(async (record) => {
-        let image = await db.get("SELECT source, alt from ImageRecord WHERE id = ?", [record.institutionImage]);
-        console.log(image);
+        let image = await this.getImage(record.institutionImage);
         return {
           timePeriod: record.timePeriod,
           image: image,
@@ -160,6 +172,24 @@ module.exports = {
             title: record.degreeTitle,
             description: record.degreeDescription
           }
+        }
+      }));
+    } catch (dbError) {
+      // Database connection error
+      console.error(dbError);
+      return dbError;
+    }
+  },
+  
+  getHobbies: async () => {
+    // We use a try catch block in case of db errors
+    try {
+      let records = await db.all("SELECT * from Hobby");
+      return await Promise.all(records.map(async (record) => {
+        let image = await this.getImage(record.hobbyImage);
+        return {
+          title: record.title,
+          description: record.description,
         }
       }));
     } catch (dbError) {
@@ -327,7 +357,28 @@ module.exports = {
       // Build the user data from the front-end and the current time into the sql query
 
       // Return the choices so far - page will build these into a chart
-      return await db.all("SELECT * from Hobby");
+      return await db.all("SELECT * from SocialItem");
+    } catch (dbError) {
+      console.error(dbError);
+      return dbError;
+    }
+  },
+  
+  processThingToDoItem: async (thingToDoItem) => {
+    // Insert new Log table entry indicating the user choice and timestamp
+    try {
+      await db.run(
+            "INSERT INTO Activity (title, description) VALUES (?, ?)",
+            [
+              thingToDoItem.title,
+              thingToDoItem.description,
+            ]
+          );
+
+      // Build the user data from the front-end and the current time into the sql query
+
+      // Return the choices so far - page will build these into a chart
+      return await db.all("SELECT * from Activity");
     } catch (dbError) {
       console.error(dbError);
       return dbError;
