@@ -395,7 +395,7 @@ module.exports = {
     }
   },
   
-  processThingToDoItem: async (thingToDoItem) => {
+  processActivity: async (thingToDoItem) => {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
       await db.run(

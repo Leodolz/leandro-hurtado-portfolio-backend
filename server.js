@@ -214,22 +214,52 @@ fastify.post("/", async (request, reply) => {
  * Return updated list of votes
  */
 fastify.post("/academicRecord", async (request, reply) => {
-  // We only send seo if the client is requesting the front-end ui
-  let params = {};
-
-  // Flag to indicate we want to show the poll results instead of the poll form
-  params.results = true;
-  let records;
-
   // We have a vote - send to the db helper to process and return results
   if (Object.keys(request.body).length > 0) {
-    records = await db.processAcademicRecord(request.body);
+    return await db.processAcademicRecord(request.body);
   } else {
     return request.body;
   }
+});
 
-  // Return the info to the client
-  return records;
+
+fastify.post("/workRecord", async (request, reply) => {
+  // We have a vote - send to the db helper to process and return results
+  if (Object.keys(request.body).length > 0) {
+    return await db.processWorkRecord(request.body);
+  } else {
+    return request.body;
+  }
+});
+
+
+fastify.post("/socialItem", async (request, reply) => {
+  // We have a vote - send to the db helper to process and return results
+  if (Object.keys(request.body).length > 0) {
+    return await db.processSocialItem(request.body);
+  } else {
+    return request.body;
+  }
+});
+
+
+fastify.post("/activity", async (request, reply) => {
+  // We have a vote - send to the db helper to process and return results
+  if (Object.keys(request.body).length > 0) {
+    return await db.processActivity(request.body);
+  } else {
+    return request.body;
+  }
+});
+
+
+fastify.post("/hobby", async (request, reply) => {
+  // We have a vote - send to the db helper to process and return results
+  if (Object.keys(request.body).length > 0) {
+    return await db.processHobbyRecord(request.body);
+  } else {
+    return request.body;
+  }
 });
 
 /**
