@@ -192,6 +192,21 @@ module.exports = {
         academicRecord.imageSource,
         academicRecord.imageAlt]
       );
+      
+      let image = await db.get("SELECT id FROM ImageRecord WHERE source= ?", [academicRecord.imageSource]);
+      
+      console.log(image);
+      
+      await db.run(
+            "INSERT INTO AcademicRecord (timePeriod, degreeLink, degreeTitle, degreeDescription, institutionImage) VALUES (?, ?, ?, ?, ?)",
+            [
+              academicRecord.timePeriod,
+              academicRecord.degreeLink,
+              academicRecord.degreeTitle,
+              academicRecord.degreeDescription,
+              image.id,
+            ]
+          );
 
       // Build the user data from the front-end and the current time into the sql query
 
