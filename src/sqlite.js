@@ -126,7 +126,24 @@ module.exports = {
     }
   },
   
-  
+  getWorkRecords: async () => {
+    // We use a try catch block in case of db errors
+    try {
+      let records = await db.all("SELECT * from WorkRecord");
+      return await Promise.all(records.map(async (record) => {
+        let image = await db.get("SELECT source, alt from ImageRecord WHERE id = ?", [record.companyImage]);
+        console.log(image);
+        return {
+          image: image,
+          ...record
+        }
+      }));
+    } catch (dbError) {
+      // Database connection error
+      console.error(dbError);
+      return dbError;
+    }
+  },
   
   getAcademicRecords: async () => {
     // We use a try catch block in case of db errors
@@ -195,6 +212,50 @@ module.exports = {
       const existingImages = await db.all(
         "SELECT * from ImageRecord WHERE source = ?",
         academicRecord.imageSource
+      );
+      if (existingImages.length > 0) {
+        console.error(`Image source already exists: ${academicRecord.imageSource}`);
+        return {
+          errorMessage: "Image source already exists!",
+          errorArgument: academicRecord.imageSource,
+        };
+      }
+      await db.run("INSERT INTO ImageRecord(source, alt) VALUES (?, ?)", [
+        academicRecord.imageSource,
+        academicRecord.imageAlt]
+      );
+      
+      let image = await db.get("SELECT id FROM ImageRecord WHERE source= ?", [academicRecord.imageSource]);
+      
+      console.log(image);
+      
+      await db.run(
+            "INSERT INTO AcademicRecord (timePeriod, degreeLink, degreeTitle, degreeDescription, institutionImage) VALUES (?, ?, ?, ?, ?)",
+            [
+              academicRecord.timePeriod,
+              academicRecord.degreeLink,
+              academicRecord.degreeTitle,
+              academicRecord.degreeDescription,
+              image.id,
+            ]
+          );
+
+      // Build the user data from the front-end and the current time into the sql query
+
+      // Return the choices so far - page will build these into a chart
+      return await db.all("SELECT * from AcademicRecord");
+    } catch (dbError) {
+      console.error(dbError);
+      return dbError;
+    }
+  },
+  
+  processWorkRecord: async (workRecord) => {
+    // Insert new Log table entry indicating the user choice and timestamp
+    try {
+      const existingImages = await db.all(
+        "SELECT * from ImageRecord WHERE source = ?",
+        workRecord.imageSource
       );
       if (existingImages.length > 0) {
         console.error(`Image source already exists: ${academicRecord.imageSource}`);
