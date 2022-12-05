@@ -110,7 +110,6 @@ dbWrapper
             "question TEXT, " +
             "answer TEXT, " +
             "email TEXT, " +
-            "FOREIGN KEY(companyImage) REFERENCES ImageRecord(id)" +
             ")"
         );
       } else {
