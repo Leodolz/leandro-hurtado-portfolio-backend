@@ -103,6 +103,16 @@ dbWrapper
             "FOREIGN KEY(companyImage) REFERENCES ImageRecord(id)" +
             ")"
         );
+        
+        await db.run(
+          "CREATE TABLE QAItem (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "question TEXT, " +
+            "answer TEXT, " +
+            "email TEXT, " +
+            "FOREIGN KEY(companyImage) REFERENCES ImageRecord(id)" +
+            ")"
+        );
       } else {
         // We have a database already - write Choices records to log for info
         console.log(await db.all("SELECT * from Choices"));
@@ -284,7 +294,7 @@ const self = module.exports = {
         imageRecord.imageAlt]
       );
       
-      let image = await db.get("SELECT id FROM ImageRecord WHERE source= ?", [imageRecord.imageSource]);
+      return await db.get("SELECT id FROM ImageRecord WHERE source= ?", [imageRecord.imageSource]);
   },
 
   processAcademicRecord: async (academicRecord) => {
