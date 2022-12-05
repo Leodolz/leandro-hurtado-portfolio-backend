@@ -109,7 +109,7 @@ dbWrapper
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "question TEXT UNIQUE, " +
             "answer TEXT, " +
-            "email TEXT " +
+            "askerEmail TEXT " +
             ")"
         );
         
