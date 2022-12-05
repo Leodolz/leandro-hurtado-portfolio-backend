@@ -110,6 +110,7 @@ dbWrapper
             "question TEXT UNIQUE, " +
             "answer TEXT, " +
             "askerEmail TEXT " +
+            "createdAt TEXT " +
             ")"
         );
         
