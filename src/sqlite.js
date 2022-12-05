@@ -8,7 +8,7 @@
 const fs = require("fs");
 
 // Initialize the database
-const dbFile = "./.data/other.db";
+const dbFile = "./.data/other2.db";
 const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const dbWrapper = require("sqlite");
@@ -242,6 +242,17 @@ const self = module.exports = {
     }
   },
   
+  getComments: async () => {
+    // We use a try catch block in case of db errors
+    try {
+      return db.all("SELECT fistName, lastName, comment, updatedAt from Comments");
+    } catch (dbError) {
+      // Database connection error
+      console.error(dbError);
+      return dbError;
+    }
+  },
+  
   processWrapper: async (body, processAction, getAction, invalidMessage) => {
     const allErrors = [];
     let processCount = 1;
@@ -446,23 +457,34 @@ const self = module.exports = {
   },
   
   getComment: async(email) => {
-    
+    return await db.get("SELECT id FROM Comments WHERE email= ?", [email]);
   },
   
   processComment: async (comment) => {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
-      
-      await db.run(
-            "INSERT INTO Comments (firstName, lastName, email, comment, createdAt) VALUES (?, ?, ?, ?, ?)",
-            [
-              comment.firstName,
-              comment.lastName,
-              comment.email,
-              comment.comment,
-              Date.now()
-            ]
-          );
+      let existingComment = await self.getComment(comment.email);
+      if(existingComment === undefined) {
+        await db.run(
+              "INSERT INTO Comments (firstName, lastName, email, comment, createdAt) VALUES (?, ?, ?, ?, ?)",
+              [
+                comment.firstName,
+                comment.lastName,
+                comment.email,
+                comment.comment,
+                Date.now()
+              ]
+            );
+      } else {
+        await db.run(
+              "UPDATE Comments SET comment = ?, updatedAt = ? WHERE id = ?",
+              [
+                comment.comment,
+                Date.now(),
+                existingComment.id
+              ]
+            );
+      }
       
       return null;
       
