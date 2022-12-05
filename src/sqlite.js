@@ -107,9 +107,9 @@ dbWrapper
         await db.run(
           "CREATE TABLE Comments (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "question TEXT UNIQUE, " +
-            "answer TEXT, " +
-            "askerEmail TEXT " +
+            "firstName TEXT, " +
+            "comment TEXT, " +
+            "askerEmail TEXT, " +
             "createdAt INTEGER " +
             ")"
         );
@@ -152,7 +152,7 @@ const self = module.exports = {
   getWorkRecords: async () => {
     // We use a try catch block in case of db errors
     try {
-      let records = await db.all("SELECT * from WorkRecord");
+      let records = await db.all("SELECT * from WorkRecords");
       return await Promise.all(records.map(async (record) => {
         let image = await self.getImage(record.companyImage);
         return {
@@ -172,7 +172,7 @@ const self = module.exports = {
   getAcademicRecords: async () => {
     // We use a try catch block in case of db errors
     try {
-      let records = await db.all("SELECT * from AcademicRecord");
+      let records = await db.all("SELECT * from AcademicRecords");
       return await Promise.all(records.map(async (record) => {
         let image = await self.getImage(record.institutionImage);
         return {
@@ -214,7 +214,7 @@ const self = module.exports = {
   getSocialItems: async () => {
     // We use a try catch block in case of db errors
     try {
-      let records = await db.all("SELECT * from SocialItem");
+      let records = await db.all("SELECT * from SocialItems");
       return await Promise.all(records.map(async (record) => {
         let image = await self.getImage(record.socialImage);
         return {
@@ -345,7 +345,7 @@ const self = module.exports = {
         return image;
       }
       await db.run(
-            "INSERT INTO AcademicRecord (timePeriod, degreeLink, degreeTitle, degreeDescription, institutionImage) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO AcademicRecords (timePeriod, degreeLink, degreeTitle, degreeDescription, institutionImage) VALUES (?, ?, ?, ?, ?)",
             [
               academicRecord.timePeriod,
               academicRecord.degreeLink,
@@ -369,7 +369,7 @@ const self = module.exports = {
         return image;
       }
       await db.run(
-            "INSERT INTO WorkRecord (timePeriod, position, description, companyImage) VALUES (?, ?, ?, ?)",
+            "INSERT INTO WorkRecords (timePeriod, position, description, companyImage) VALUES (?, ?, ?, ?)",
             [
               workRecord.timePeriod,
               workRecord.position,
