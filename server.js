@@ -144,7 +144,7 @@ fastify.get("/activities", async (request, reply) => {
   let params = {};
 
   // Get the available choices from the database
-  const records = await db.getThingsToDo();
+  const records = await db.getActivities();
   if (records) {
     params = records;
   }
@@ -215,11 +215,20 @@ fastify.post("/", async (request, reply) => {
  */
 fastify.post("/academicRecord", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  if (Object.keys(request.body).length > 0) {
-    return await db.processAcademicRecord(request.body);
-  } else {
-    return request.body;
+  if(Array.isArray(request.body)) {
+    for(const singleRecord of request.body) {
+      await db.processAcademicRecord(singleRecord);
+    }
   }
+  else if (Object.keys(request.body).length > 0) {
+    await db.processAcademicRecord(request.body);
+  } else {
+    return {
+      errorMessage: data.invalidBodyMessage,
+      requestBody: request.body
+    };
+  }
+  return await db.getAcademicRecords();
 });
 
 

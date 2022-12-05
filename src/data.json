@@ -1,5 +1,6 @@
 {
   "database": "sqlite.js",
   "errorMessage": "Whoops! Error connecting to the database–please try again!",
-  "setupMessage": "🚧 Whoops! Looks like the database isn't setup yet! 🚧"
+  "setupMessage": "🚧 Whoops! Looks like the database isn't setup yet! 🚧",
+  "invalidBodyMessage": "Invalid request given! Please post either a json object or a json array with the appropiate parameters"
 }
