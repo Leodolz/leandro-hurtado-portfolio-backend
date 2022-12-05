@@ -175,7 +175,7 @@ const self = module.exports = {
         let image = await self.getImage(record.institutionImage);
         return {
           timePeriod: record.timePeriod,
-          image: image,
+          institutionImage: image,
           degree: {
             link : record.degreeLink,
             title: record.degreeTitle,
