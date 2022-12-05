@@ -415,7 +415,7 @@ const self = module.exports = {
         return image;
       }
       await db.run(
-            "INSERT INTO SocialItem (title, linkPage, socialImage) VALUES (?, ?, ?)",
+            "INSERT INTO SocialItems (title, linkPage, socialImage) VALUES (?, ?, ?)",
             [
               socialItem.title,
               socialItem.linkPage,
