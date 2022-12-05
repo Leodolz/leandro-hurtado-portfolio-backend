@@ -117,7 +117,7 @@ dbWrapper
   });
 
 // Our server script will call these methods to connect to the db
-module.exports = {
+const self = module.exports = {
   /**
    * Get the options in the database
    *
@@ -143,7 +143,7 @@ module.exports = {
     try {
       let records = await db.all("SELECT * from WorkRecord");
       return await Promise.all(records.map(async (record) => {
-        let image = await this.getImage(record.companyImage);
+        let image = await self.getImage(record.companyImage);
         return {
           image: image,
           timePeriod: record.timePeriod,
@@ -163,7 +163,7 @@ module.exports = {
     try {
       let records = await db.all("SELECT * from AcademicRecord");
       return await Promise.all(records.map(async (record) => {
-        let image = await this.getImage(record.institutionImage);
+        let image = await self.getImage(record.institutionImage);
         return {
           timePeriod: record.timePeriod,
           image: image,
@@ -186,7 +186,7 @@ module.exports = {
     try {
       let records = await db.all("SELECT * from Hobby");
       return await Promise.all(records.map(async (record) => {
-        let image = await this.getImage(record.hobbyImage);
+        let image = await self.getImage(record.hobbyImage);
         return {
           title: record.title,
           description: record.description,
@@ -205,7 +205,7 @@ module.exports = {
     try {
       let records = await db.all("SELECT * from SocialItem");
       return await Promise.all(records.map(async (record) => {
-        let image = await this.getImage(record.socialImage);
+        let image = await self.getImage(record.socialImage);
         return {
           title: record.title,
           linkPage: record.linkPage,
@@ -291,7 +291,7 @@ module.exports = {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
       
-      let image = await this.processImage(academicRecord);
+      let image = await self.processImage(academicRecord);
       if(image.hasOwnProperty("errorMessage")) {
         return image;
       }
@@ -319,7 +319,7 @@ module.exports = {
   processWorkRecord: async (workRecord) => {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
-      let image = await this.processImage(workRecord);
+      let image = await self.processImage(workRecord);
       if(image.hasOwnProperty("errorMessage")) {
         return image;
       }
@@ -346,7 +346,7 @@ module.exports = {
   processHobbyRecord: async (hobby) => {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
-      let image = await this.processImage(hobby);
+      let image = await self.processImage(hobby);
       if(image.hasOwnProperty("errorMessage")) {
         return image;
       }
@@ -372,7 +372,7 @@ module.exports = {
   processSocialItem: async (socialItem) => {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
-      let image = await this.processImage(socialItem);
+      let image = await self.processImage(socialItem);
       if(image.hasOwnProperty("errorMessage")) {
         return image;
       }
