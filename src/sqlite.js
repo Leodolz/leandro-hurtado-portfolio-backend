@@ -113,15 +113,6 @@ dbWrapper
             ")"
         );
         
-        
-        await db.run(
-          "CREATE TABLE QuestionSubscription (" +
-            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "question INTEGER, " +
-            "answer TEXT, " +
-            "email TEXT " +
-            ")"
-        );
       } else {
         // We have a database already - write Choices records to log for info
         console.log(await db.all("SELECT * from Choices"));
