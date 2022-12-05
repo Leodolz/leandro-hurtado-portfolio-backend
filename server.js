@@ -174,6 +174,25 @@ fastify.get("/socialItems", async (request, reply) => {
   return reply.send(params);
 });
 
+fastify.get("/comments", async (request, reply) => {
+  /* 
+  Params is the data we pass to the client
+  - SEO values for front-end UI but not for raw data
+  */
+  let params = {};
+
+  // Get the available choices from the database
+  const records = await db.getComments();
+  if (records) {
+    params = records;
+  }
+  // Let the user know if there was a db error
+  else params.error = data.errorMessage;
+
+  // Send the page options or raw JSON data if the client requested it
+  return reply.send(params);
+});
+
 /**
  * Post route to process user vote
  *
@@ -221,41 +240,30 @@ fastify.post("/academicRecord", async (request, reply) => {
 
 fastify.post("/workRecord", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  if (Object.keys(request.body).length > 0) {
-    return await db.processWorkRecord(request.body);
-  } else {
-    return request.body;
-  }
+  return await db.processWrapper(request.body, db.ProcessWorkRecord, db.getWorkRecords, data.invalidBodyMessage);
 });
 
 
 fastify.post("/socialItem", async (request, reply) => {
-  // We have a vote - send to the db helper to process and return results
-  if (Object.keys(request.body).length > 0) {
-    return await db.processSocialItem(request.body);
-  } else {
-    return request.body;
-  }
+  // We have a vote - send to the db helper to process and return re
+  return await db.processWrapper(request.body, db.ProcessSocialItem, db.getSocialItems, data.invalidBodyMessage);
 });
 
 
 fastify.post("/activity", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  if (Object.keys(request.body).length > 0) {
-    return await db.processActivity(request.body);
-  } else {
-    return request.body;
-  }
+  return await db.processWrapper(request.body, db.processActivity, db.getActivities, data.invalidBodyMessage);
 });
 
 
 fastify.post("/hobby", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  if (Object.keys(request.body).length > 0) {
-    return await db.processHobbyRecord(request.body);
-  } else {
-    return request.body;
-  }
+  return await db.processWrapper(request.body, db.processHobby, db.getHobbies, data.invalidBodyMessage);
+});
+
+fastify.post("/comment", async (request, reply) => {
+  // We have a vote - send to the db helper to process and return results
+  return await db.processWrapper(request.body, db.processComment, db.getComments, data.invalidBodyMessage);
 });
 
 /**
