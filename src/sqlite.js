@@ -105,11 +105,11 @@ dbWrapper
         );
         
         await db.run(
-          "CREATE TABLE QAItem (" +
+          "CREATE TABLE Question (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "question TEXT, " +
             "answer TEXT, " +
-            "email TEXT, " +
+            "email TEXT " +
             ")"
         );
       } else {
