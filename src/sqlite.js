@@ -241,9 +241,11 @@ const self = module.exports = {
   
   processWrapper: async (body, processAction, getAction, invalidMessage) => {
     const allErrors = [];
+    let processCount = 1;
     if(Array.isArray(body)) {
+      processCount = body.length;
       for(const singleRecord of body) {
-        let error = await db.processAction(singleRecord);
+        let error = await processAction(singleRecord);
         if(error !== null) {
           allErrors.push({
             originalBody: singleRecord,
@@ -259,7 +261,6 @@ const self = module.exports = {
           originalBody: body,
           error
         });
-        return {errors: allErrors};
       }
     } else {
       return {
@@ -267,7 +268,12 @@ const self = module.exports = {
         requestBody: body
       };
     }
-    if(allErrors.length)
+    if(allErrors.length > 0) {
+      return {
+        errorMessage: `${allErrors.length} out of ${processCount} record(s) failed upon submission!`,
+        errors: allErrors
+      };
+    }
     return await getAction();
   },
 
@@ -373,7 +379,7 @@ const self = module.exports = {
       // Build the user data from the front-end and the current time into the sql query
 
       // Return the choices so far - page will build these into a chart
-      return await db.all("SELECT * from WorkRecord");
+      return null;
     } catch (dbError) {
       console.error(dbError);
       return dbError;
