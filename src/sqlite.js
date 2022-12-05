@@ -445,9 +445,9 @@ const self = module.exports = {
     }
   },
   
-  getComment: async() => {
+  getComment: async(email) => {
     
-  }
+  },
   
   processComment: async (comment) => {
     // Insert new Log table entry indicating the user choice and timestamp
