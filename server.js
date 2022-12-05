@@ -215,20 +215,7 @@ fastify.post("/", async (request, reply) => {
  */
 fastify.post("/academicRecord", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  if(Array.isArray(request.body)) {
-    for(const singleRecord of request.body) {
-      await db.processAcademicRecord(singleRecord);
-    }
-  }
-  else if (Object.keys(request.body).length > 0) {
-    await db.processAcademicRecord(request.body);
-  } else {
-    return {
-      errorMessage: data.invalidBodyMessage,
-      requestBody: request.body
-    };
-  }
-  return await db.getAcademicRecords();
+  return await db.processWrapper(request.body, db.processAcademicRecord, db.getAcademicRecords, data.invalidBodyMessage);
 });
 
 

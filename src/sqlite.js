@@ -238,6 +238,38 @@ const self = module.exports = {
       return dbError;
     }
   },
+  
+  processWrapper: async (body, processAction, getAction, invalidMessage) => {
+    const allErrors = [];
+    if(Array.isArray(body)) {
+      for(const singleRecord of body) {
+        let error = await db.processAction(singleRecord);
+        if(error !== null) {
+          allErrors.push({
+            originalBody: singleRecord,
+            error
+          });
+        }
+      }
+    }
+    else if (Object.keys(body).length > 0) {
+      let error = await processAction(body);
+      if(error !== null) {
+        allErrors.push({
+          originalBody: body,
+          error
+        });
+        return {errors: allErrors};
+      }
+    } else {
+      return {
+        errorMessage: invalidMessage,
+        requestBody: body
+      };
+    }
+    if(allErrors.length)
+    return await getAction();
+  },
 
   /**
    * Process a user vote
@@ -314,6 +346,7 @@ const self = module.exports = {
               image.id,
             ]
           );
+      return null;
     } catch (dbError) {
       console.error(dbError);
       return dbError;
