@@ -8,7 +8,7 @@
 const fs = require("fs");
 
 // Initialize the database
-const dbFile = "./.data/other2.db";
+const dbFile = "./.data/other3.db";
 const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const dbWrapper = require("sqlite");
@@ -77,7 +77,7 @@ dbWrapper
             "title TEXT UNIQUE, " +
             "linkPage TEXT, " +
             "socialImage INTEGER, " +
-            "FOREIGN KEY(socialImage) REFERENCES ImageRecord(id)" +
+            "FOREIGN KEY(socialImage) REFERENCES ImageRecords(id)" +
             ")"
         );
 
@@ -89,7 +89,7 @@ dbWrapper
             "degreeLink TEXT UNIQUE, " +
             "degreeTitle TEXT, " +
             "degreeDescription TEXT, " +
-            "FOREIGN KEY(institutionImage) REFERENCES ImageRecord(id)" +
+            "FOREIGN KEY(institutionImage) REFERENCES ImageRecords(id)" +
             ")"
         );
 
@@ -100,7 +100,7 @@ dbWrapper
             "companyImage INTEGER, " +
             "position TEXT, " +
             "description TEXT, " +
-            "FOREIGN KEY(companyImage) REFERENCES ImageRecord(id)" +
+            "FOREIGN KEY(companyImage) REFERENCES ImageRecords(id)" +
             ")"
         );
         
@@ -147,7 +147,7 @@ const self = module.exports = {
   },
   
   getImage: async(imageId) => {
-    return await db.get("SELECT source, alt from ImageRecord WHERE id = ?", [imageId]);
+    return await db.get("SELECT source, alt from ImageRecords WHERE id = ?", [imageId]);
   },
   
   getWorkRecords: async () => {
