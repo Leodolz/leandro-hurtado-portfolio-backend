@@ -375,10 +375,6 @@ const self = module.exports = {
               image.id,
             ]
           );
-
-      // Build the user data from the front-end and the current time into the sql query
-
-      // Return the choices so far - page will build these into a chart
       return null;
     } catch (dbError) {
       console.error(dbError);
@@ -401,11 +397,8 @@ const self = module.exports = {
               image.id,
             ]
           );
-
-      // Build the user data from the front-end and the current time into the sql query
-
-      // Return the choices so far - page will build these into a chart
-      return await db.all("SELECT * from Hobby");
+      return null;
+      
     } catch (dbError) {
       console.error(dbError);
       return dbError;
@@ -427,11 +420,7 @@ const self = module.exports = {
               image.id,
             ]
           );
-
-      // Build the user data from the front-end and the current time into the sql query
-
-      // Return the choices so far - page will build these into a chart
-      return await db.all("SELECT * from SocialItem");
+      return null;
     } catch (dbError) {
       console.error(dbError);
       return dbError;
@@ -448,11 +437,9 @@ const self = module.exports = {
               thingToDoItem.description,
             ]
           );
-
-      // Build the user data from the front-end and the current time into the sql query
-
-      // Return the choices so far - page will build these into a chart
-      return await db.all("SELECT * from Activity");
+      
+      return null;
+      
     } catch (dbError) {
       console.error(dbError);
       return dbError;
