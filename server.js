@@ -240,13 +240,13 @@ fastify.post("/academicRecord", async (request, reply) => {
 
 fastify.post("/workRecord", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  return await db.processWrapper(request.body, db.ProcessWorkRecord, db.getWorkRecords, data.invalidBodyMessage);
+  return await db.processWrapper(request.body, db.processWorkRecord, db.getWorkRecords, data.invalidBodyMessage);
 });
 
 
 fastify.post("/socialItem", async (request, reply) => {
   // We have a vote - send to the db helper to process and return re
-  return await db.processWrapper(request.body, db.ProcessSocialItem, db.getSocialItems, data.invalidBodyMessage);
+  return await db.processWrapper(request.body, db.processSocialItem, db.getSocialItems, data.invalidBodyMessage);
 });
 
 
@@ -258,7 +258,7 @@ fastify.post("/activity", async (request, reply) => {
 
 fastify.post("/hobby", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  return await db.processWrapper(request.body, db.processHobby, db.getHobbies, data.invalidBodyMessage);
+  return await db.processWrapper(request.body, db.processHobbyRecord, db.getHobbies, data.invalidBodyMessage);
 });
 
 fastify.post("/comment", async (request, reply) => {
