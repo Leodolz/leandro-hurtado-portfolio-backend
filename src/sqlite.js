@@ -444,6 +444,33 @@ const self = module.exports = {
       return dbError;
     }
   },
+  
+  getComment: async() => {
+    
+  }
+  
+  processComment: async (comment) => {
+    // Insert new Log table entry indicating the user choice and timestamp
+    try {
+      
+      await db.run(
+            "INSERT INTO Comments (firstName, lastName, email, comment, createdAt) VALUES (?, ?, ?, ?, ?)",
+            [
+              comment.firstName,
+              comment.lastName,
+              comment.email,
+              comment.comment,
+              Date.now()
+            ]
+          );
+      
+      return null;
+      
+    } catch (dbError) {
+      console.error(dbError);
+      return dbError;
+    }
+  },
 
   /**
    * Get logs
