@@ -46,7 +46,7 @@ dbWrapper
         );
 
         await db.run(
-          "CREATE TABLE ImageRecord (" +
+          "CREATE TABLE ImageRecords (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "source TEXT UNIQUE, " +
             "alt TEXT " +
@@ -54,7 +54,7 @@ dbWrapper
         );
         
         await db.run(
-          "CREATE TABLE Activity (" +
+          "CREATE TABLE Activities (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "title TEXT UNIQUE, " +
             "description TEXT " +
@@ -62,17 +62,17 @@ dbWrapper
         );
 
         await db.run(
-          "CREATE TABLE Hobby (" +
+          "CREATE TABLE Hobbies (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "title TEXT UNIQUE, " +
             "description TEXT, " +
             "hobbyImage INTEGER, " +
-            "FOREIGN KEY(hobbyImage) REFERENCES ImageRecord(id)" +
+            "FOREIGN KEY(hobbyImage) REFERENCES ImageRecords(id)" +
             ")"
         );
 
         await db.run(
-          "CREATE TABLE SocialItem (" +
+          "CREATE TABLE SocialItems (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "title TEXT UNIQUE, " +
             "linkPage TEXT, " +
@@ -82,7 +82,7 @@ dbWrapper
         );
 
         await db.run(
-          "CREATE TABLE AcademicRecord (" +
+          "CREATE TABLE AcademicRecords (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "timePeriod TEXT, " +
             "institutionImage INTEGER, " +
@@ -94,7 +94,7 @@ dbWrapper
         );
 
         await db.run(
-          "CREATE TABLE WorkRecord (" +
+          "CREATE TABLE WorkRecords (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "timePeriod TEXT, " +
             "companyImage INTEGER, " +
@@ -105,7 +105,7 @@ dbWrapper
         );
         
         await db.run(
-          "CREATE TABLE Question (" +
+          "CREATE TABLE Comments (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "question TEXT UNIQUE, " +
             "answer TEXT, " +
@@ -195,7 +195,7 @@ const self = module.exports = {
   getHobbies: async () => {
     // We use a try catch block in case of db errors
     try {
-      let records = await db.all("SELECT * from Hobby");
+      let records = await db.all("SELECT * from Hobbies");
       return await Promise.all(records.map(async (record) => {
         let image = await self.getImage(record.hobbyImage);
         return {
@@ -233,7 +233,7 @@ const self = module.exports = {
   getActivities: async () => {
     // We use a try catch block in case of db errors
     try {
-      return db.all("SELECT title, description from Activity");
+      return db.all("SELECT title, description from Activities");
     } catch (dbError) {
       // Database connection error
       console.error(dbError);
@@ -318,7 +318,7 @@ const self = module.exports = {
   
   processImage: async (imageRecord) => {
     const existingImages = await db.all(
-        "SELECT * from ImageRecord WHERE source = ?",
+        "SELECT * from ImageRecords WHERE source = ?",
         imageRecord.imageSource
       );
       if (existingImages.length > 0) {
@@ -328,12 +328,12 @@ const self = module.exports = {
           errorArgument: imageRecord.imageSource,
         };
       }
-      await db.run("INSERT INTO ImageRecord(source, alt) VALUES (?, ?)", [
+      await db.run("INSERT INTO ImageRecords(source, alt) VALUES (?, ?)", [
         imageRecord.imageSource,
         imageRecord.imageAlt]
       );
       
-      return await db.get("SELECT id FROM ImageRecord WHERE source= ?", [imageRecord.imageSource]);
+      return await db.get("SELECT id FROM ImageRecords WHERE source= ?", [imageRecord.imageSource]);
   },
 
   processAcademicRecord: async (academicRecord) => {
@@ -392,7 +392,7 @@ const self = module.exports = {
         return image;
       }
       await db.run(
-            "INSERT INTO Hobby (title, description, hobbyImage) VALUES (?, ?, ?)",
+            "INSERT INTO Hobbies (title, description, hobbyImage) VALUES (?, ?, ?)",
             [
               hobby.title,
               hobby.description,
@@ -433,7 +433,7 @@ const self = module.exports = {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
       await db.run(
-            "INSERT INTO Activity (title, description) VALUES (?, ?)",
+            "INSERT INTO Activities (title, description) VALUES (?, ?)",
             [
               thingToDoItem.title,
               thingToDoItem.description,
