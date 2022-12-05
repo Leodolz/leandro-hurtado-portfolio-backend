@@ -108,9 +108,10 @@ dbWrapper
           "CREATE TABLE Comments (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "firstName TEXT, " +
+            "lastName TEXT," +
             "comment TEXT, " +
-            "askerEmail TEXT, " +
-            "createdAt INTEGER " +
+            "email TEXT UNIQUE, " +
+            "updatedAt INTEGER " +
             ")"
         );
         
@@ -322,11 +323,7 @@ const self = module.exports = {
         imageRecord.imageSource
       );
       if (existingImages.length > 0) {
-        console.error(`Image source already exists: ${imageRecord.imageSource}`);
-        return {
-          errorMessage: "Image source already exists!",
-          errorArgument: imageRecord.imageSource,
-        };
+        return { id: existingImages[0].id }
       }
       await db.run("INSERT INTO ImageRecords(source, alt) VALUES (?, ?)", [
         imageRecord.imageSource,
