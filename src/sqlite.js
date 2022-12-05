@@ -107,7 +107,7 @@ dbWrapper
         await db.run(
           "CREATE TABLE Question (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "question TEXT, " +
+            "question TEXT UNIQUE, " +
             "answer TEXT, " +
             "email TEXT " +
             ")"
