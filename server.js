@@ -256,10 +256,10 @@ fastify.post("/email", async (request, reply) => {
     return {
       success: false,
       errorMessage: "Looks like another person sent an email recently! Please wait " +
-      "up to 5 minutes to try again!";
+      "up to 5 minutes to try again!"
     }
   }
-  
+  /*
   let contactInfo = "\n\nContact info:\n";
   let extraInfo = false;
   if(request.body.company.length > 0) {
@@ -292,6 +292,7 @@ fastify.post("/email", async (request, reply) => {
       console.log('Email sent: ' + info.response);
     }
   });
+  */
   
   return await db.processWrapper(
     request.body,
