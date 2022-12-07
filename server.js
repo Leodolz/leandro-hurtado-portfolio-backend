@@ -19,8 +19,16 @@ const fastify = require("fastify")({
 });
 
 fastify.register(rateLimit, {
-  max: 1,
-  timeWindow: "1 minute",
+  global: true,
+  max: 3,
+  timeWindow: 50000,
+});
+
+fastify.setErrorHandler(function (error, request, reply) {
+  if (reply.statusCode === 429) {
+    error.message = 'You hit the rate limit! Slow down please!'
+  }
+  reply.send(error)
 });
 
 // Setup our static files
