@@ -13,6 +13,7 @@
     "@fastify/view": "^7.1.2",
     "fastify": "^4.9.2",
     "handlebars": "^4.7.7",
+    "nodemailer": "^6.8.0",
     "sqlite": "^4.1.2",
     "sqlite3": "^5.1.2"
   },

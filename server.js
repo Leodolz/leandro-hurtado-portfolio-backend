@@ -10,6 +10,16 @@
 // Utilities we need
 const fs = require("fs");
 const path = require("path");
+const nodemailer = require("nodemailer");
+const 
+
+const transport = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'leandro.hurtado.portfolio@gmail.com',
+    pass: 'cs601test'
+  }
+});
 
 // Require the fastify framework and instantiate it
 const fastify = require("fastify")({
