@@ -17,21 +17,27 @@ const fastify = require("fastify")({
   logger: false,
 });
 
-// Setup our static files
-fastify.register(require("@fastify/static"), {
-  root: path.join(__dirname, "public"),
-  prefix: "/", // optional: default '/'
+fastify.register(import("@fastify/rate-limit"), {
+  global: true,
+  max: 10,
+  timeWindow: 1000*30,
 });
+
+// Setup our static files
+//fastify.register(require("@fastify/static"), {
+//  root: path.join(__dirname, "public"),
+//  prefix: "/", // optional: default '/'
+//});
 
 // Formbody lets us parse incoming forms
-fastify.register(require("@fastify/formbody"));
+//fastify.register(require("@fastify/formbody"));
 
 // View is a templating manager for fastify
-fastify.register(require("@fastify/view"), {
-  engine: {
-    handlebars: require("handlebars"),
-  },
-});
+//fastify.register(require("@fastify/view"), {
+//  engine: {
+//    handlebars: require("handlebars"),
+//  },
+//});
 
 // Load and parse SEO data
 const seo = require("./src/seo.json");
@@ -136,24 +142,35 @@ fastify.get("/hobbies", async (request, reply) => {
   return reply.send(params);
 });
 
-fastify.get("/activities", async (request, reply) => {
-  /* 
+fastify.get(
+  "/activities",
+  {
+    config: {
+      rateLimit: {
+        max: 1,
+        timeWindow: "1 minute",
+      },
+    },
+  },
+  async (request, reply) => {
+    /* 
   Params is the data we pass to the client
   - SEO values for front-end UI but not for raw data
   */
-  let params = {};
+    let params = {};
 
-  // Get the available choices from the database
-  const records = await db.getActivities();
-  if (records) {
-    params = records;
+    // Get the available choices from the database
+    const records = await db.getActivities();
+    if (records) {
+      params = records;
+    }
+    // Let the user know if there was a db error
+    else params.error = data.errorMessage;
+
+    // Send the page options or raw JSON data if the client requested it
+    return reply.send(params);
   }
-  // Let the user know if there was a db error
-  else params.error = data.errorMessage;
-
-  // Send the page options or raw JSON data if the client requested it
-  return reply.send(params);
-});
+);
 
 fastify.get("/socialItems", async (request, reply) => {
   /* 
@@ -234,36 +251,62 @@ fastify.post("/", async (request, reply) => {
  */
 fastify.post("/academicRecord", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  return await db.processWrapper(request.body, db.processAcademicRecord, db.getAcademicRecords, data.invalidBodyMessage);
+  return await db.processWrapper(
+    request.body,
+    db.processAcademicRecord,
+    db.getAcademicRecords,
+    data.invalidBodyMessage
+  );
 });
-
 
 fastify.post("/workRecord", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  return await db.processWrapper(request.body, db.processWorkRecord, db.getWorkRecords, data.invalidBodyMessage);
+  return await db.processWrapper(
+    request.body,
+    db.processWorkRecord,
+    db.getWorkRecords,
+    data.invalidBodyMessage
+  );
 });
-
 
 fastify.post("/socialItem", async (request, reply) => {
   // We have a vote - send to the db helper to process and return re
-  return await db.processWrapper(request.body, db.processSocialItem, db.getSocialItems, data.invalidBodyMessage);
+  return await db.processWrapper(
+    request.body,
+    db.processSocialItem,
+    db.getSocialItems,
+    data.invalidBodyMessage
+  );
 });
-
 
 fastify.post("/activity", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  return await db.processWrapper(request.body, db.processActivity, db.getActivities, data.invalidBodyMessage);
+  return await db.processWrapper(
+    request.body,
+    db.processActivity,
+    db.getActivities,
+    data.invalidBodyMessage
+  );
 });
-
 
 fastify.post("/hobby", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  return await db.processWrapper(request.body, db.processHobbyRecord, db.getHobbies, data.invalidBodyMessage);
+  return await db.processWrapper(
+    request.body,
+    db.processHobbyRecord,
+    db.getHobbies,
+    data.invalidBodyMessage
+  );
 });
 
 fastify.post("/comment", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  return await db.processWrapper(request.body, db.processComment, db.getComments, data.invalidBodyMessage);
+  return await db.processWrapper(
+    request.body,
+    db.processComment,
+    db.getComments,
+    data.invalidBodyMessage
+  );
 });
 
 /**
