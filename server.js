@@ -11,12 +11,12 @@
 const fs = require("fs");
 const path = require("path");
 const nodemailer = require("nodemailer");
-const 
+const portfolioMail = 'leandro.hurtado.portfolio@gmail.com';
 
 const transport = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'leandro.hurtado.portfolio@gmail.com',
+    user: portfolioMail,
     pass: 'cs601test'
   }
 });
@@ -251,7 +251,23 @@ fastify.post("/comment", async (request, reply) => {
 });
 
 fastify.post("/email", async (request, reply) => {
+  
+  let contactInfo = "\n\nContact info:\n";
+  let extraInfo = false;
+  if(request.body.company.length > 0) {
+    contactInfo += `Company: ${request.body.company}\n`; 
+  }
+  if(request.body.phone.length > 0) {
+    contactInfo += `Country: ${request.body.country}\n`
+  }
   // We have a vote - send to the db helper to process and return results
+  const mailOptions = {
+    from: portfolioMail,
+    to: request.body.email,
+    subject: request.body.subject,
+    text: "This is a message sent from Portfolio website, content is shown below:\n" +
+    request.body.message + contactInfo
+  };
   
   return await db.processWrapper(
     request.body,
