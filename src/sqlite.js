@@ -469,7 +469,26 @@ const self = module.exports = {
   },
   
   verifyEmailFrequency: async() => {
-    let existingEmail = await db.get("SELECT id FROM EmailRequests WHERE createdAt > ? ", [Date.now()]);
+    let existingEmail = await db.get("SELECT id FROM EmailRequests WHERE createdAt > ? ", [Date.now() - 1000 * 300]);
+    return existingEmail !== undefined || existingEmail !== null;
+  },
+  
+  processEmailRequest: async(email) => {
+    try {
+      await db.run(
+            "INSERT INTO EmailRequests (email, createdAt) VALUES (?, ?)",
+            [
+              email,
+              Date.now(),
+            ]
+          );
+      
+      return null;
+      
+    } catch (dbError) {
+      console.error(dbError);
+      return dbError;
+    }
   },
   
   processComment: async (comment) => {
