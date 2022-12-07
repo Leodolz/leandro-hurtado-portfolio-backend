@@ -252,22 +252,46 @@ fastify.post("/comment", async (request, reply) => {
 
 fastify.post("/email", async (request, reply) => {
   
+  if(await db.verifyEmailFrequency()) {
+    return {
+      success: false,
+      errorMessage: "Looks like another person sent an email recently! Please wait " +
+      "up to 5 minutes to try again!";
+    }
+  }
+  
   let contactInfo = "\n\nContact info:\n";
   let extraInfo = false;
   if(request.body.company.length > 0) {
     contactInfo += `Company: ${request.body.company}\n`; 
+    extraInfo = true;
   }
   if(request.body.phone.length > 0) {
-    contactInfo += `Country: ${request.body.country}\n`
+    contactInfo += `Country: ${request.body.country}\nPhone: ${request.body.phone}`;
+    extraInfo = true;
+  }
+  if(!extraInfo) {
+    contactInfo = "";
   }
   // We have a vote - send to the db helper to process and return results
   const mailOptions = {
     from: portfolioMail,
-    to: request.body.email,
+    to: "leodolz14@gmail.com",
     subject: request.body.subject,
-    text: "This is a message sent from Portfolio website, content is shown below:\n" +
-    request.body.message + contactInfo
+    text: `This is a message sent from Portfolio website, this message was sent by: ` +
+    `${request.body.firstName} ${request.body.lastName}. Content is shown below:\n` +
+    request.body.message + contactInfo,
+    cc: request.body.email
   };
+  
+  transport.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+      return {success: false, errorMessage: error};
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
   
   return await db.processWrapper(
     request.body,
