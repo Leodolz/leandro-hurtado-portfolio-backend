@@ -10,7 +10,6 @@
 // Utilities we need
 const fs = require("fs");
 const path = require("path");
-const rateLimit = require("@fastify/rate-limit");
 
 // Require the fastify framework and instantiate it
 const fastify = require("fastify")({
@@ -18,40 +17,6 @@ const fastify = require("fastify")({
   logger: false,
 });
 
-fastify.register(rateLimit, {
-  global: true,
-  max: 3,
-  timeWindow: 50000,
-});
-
-fastify.setErrorHandler(function (error, request, reply) {
-  if (reply.statusCode === 429) {
-    error.message = 'You hit the rate limit! Slow down please!'
-  }
-  reply.send(error)
-});
-
-// Setup our static files
-//fastify.register(require("@fastify/static"), {
-//  root: path.join(__dirname, "public"),
-//  prefix: "/", // optional: default '/'
-//});
-
-// Formbody lets us parse incoming forms
-//fastify.register(require("@fastify/formbody"));
-
-// View is a templating manager for fastify
-//fastify.register(require("@fastify/view"), {
-//  engine: {
-//    handlebars: require("handlebars"),
-//  },
-//});
-
-// Load and parse SEO data
-const seo = require("./src/seo.json");
-if (seo.url === "glitch-default") {
-  seo.url = `https://${process.env.PROJECT_DOMAIN}.glitch.me`;
-}
 
 // We use a module for handling database operations in /src
 const data = require("./src/data.json");
@@ -150,14 +115,6 @@ fastify.get("/hobbies", async (request, reply) => {
 
 fastify.get(
   "/activities",
-  {
-    config: {
-      rateLimit: {
-        max: 2,
-        timeWindow: '1 minute'
-      }
-    },
-  },
   async (request, reply) => {
     /* 
   Params is the data we pass to the client
@@ -214,38 +171,6 @@ fastify.get("/comments", async (request, reply) => {
 
   // Send the page options or raw JSON data if the client requested it
   return reply.send(params);
-});
-
-/**
- * Post route to process user vote
- *
- * Retrieve vote from body data
- * Send vote to database helper
- * Return updated list of votes
- */
-fastify.post("/", async (request, reply) => {
-  // We only send seo if the client is requesting the front-end ui
-  let params = request.query.raw ? {} : { seo: seo };
-
-  // Flag to indicate we want to show the poll results instead of the poll form
-  params.results = true;
-  let options;
-
-  // We have a vote - send to the db helper to process and return results
-  if (request.body.language) {
-    options = await db.processVote(request.body.language);
-    if (options) {
-      // We send the choices and numbers in parallel arrays
-      params.optionNames = options.map((choice) => choice.language);
-      params.optionCounts = options.map((choice) => choice.picks);
-    }
-  }
-  params.error = options ? null : data.errorMessage;
-
-  // Return the info to the client
-  return request.query.raw
-    ? reply.send(params)
-    : reply.view("/src/pages/index.hbs", params);
 });
 
 /**
@@ -321,7 +246,7 @@ fastify.post("/comment", async (request, reply) => {
  * Send raw json or the admin handlebars page
  */
 fastify.get("/logs", async (request, reply) => {
-  let params = request.query.raw ? {} : { seo: seo };
+  let params = {};
 
   // Get the log history from the db
   params.optionHistory = await db.getLogs();
@@ -343,7 +268,7 @@ fastify.get("/logs", async (request, reply) => {
  * If auth is successful, empty the history
  */
 fastify.post("/reset", async (request, reply) => {
-  let params = request.query.raw ? {} : { seo: seo };
+  let params = {};
 
   /* 
   Authenticate the user request by checking against the env key variable

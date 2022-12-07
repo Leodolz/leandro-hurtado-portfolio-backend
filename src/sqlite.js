@@ -115,6 +115,14 @@ dbWrapper
             ")"
         );
         
+        await db.run(
+          "CREATE TABLE EmailRequests (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "email TEXT, " +
+            "createdAt INTEGER " +
+            ")"
+        );
+        
       } else {
         // We have a database already - write Choices records to log for info
         console.log(await db.all("SELECT * from Choices"));
@@ -460,13 +468,17 @@ const self = module.exports = {
     return await db.get("SELECT id FROM Comments WHERE email= ?", [email]);
   },
   
+  verifyEmailFrequency: async() => {
+    let existingEmail = await db.get("SELECT id FROM EmailRequests WHERE createdAt > ? ", [Date.now()]);
+  },
+  
   processComment: async (comment) => {
     // Insert new Log table entry indicating the user choice and timestamp
     try {
       let existingComment = await self.getComment(comment.email);
       if(existingComment === undefined) {
         await db.run(
-              "INSERT INTO Comments (firstName, lastName, email, comment, createdAt) VALUES (?, ?, ?, ?, ?)",
+              "INSERT INTO Comments (firstName, lastName, email, comment, updatedAt) VALUES (?, ?, ?, ?, ?)",
               [
                 comment.firstName,
                 comment.lastName,
