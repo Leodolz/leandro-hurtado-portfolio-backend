@@ -10,11 +10,18 @@
 // Utilities we need
 const fs = require("fs");
 const path = require("path");
+const rateLimit = require("@fastify/rate-limit");
 
 // Require the fastify framework and instantiate it
 const fastify = require("fastify")({
   // Set this to true for detailed logging:
   logger: false,
+});
+
+fastify.register(rateLimit, {
+  global: true,
+  max: 3,
+  timeWindow: 50000,
 });
 
 fastify.setErrorHandler(function (error, request, reply) {
@@ -147,7 +154,7 @@ fastify.get(
     config: {
       rateLimit: {
         max: 2,
-        timeWindow: 10000
+        timeWindow: '1 minute'
       }
     },
   },
