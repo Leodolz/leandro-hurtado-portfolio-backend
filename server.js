@@ -242,10 +242,11 @@ fastify.post("/comment", async (request, reply) => {
 
 fastify.post("/email", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
+  
   return await db.processWrapper(
     request.body,
     db.processEmailRequest,
-    db.getComments,
+    () => {return true},
     data.invalidBodyMessage
   );
 });
