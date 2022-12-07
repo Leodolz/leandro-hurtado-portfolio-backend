@@ -246,7 +246,7 @@ fastify.post("/email", async (request, reply) => {
   return await db.processWrapper(
     request.body,
     db.processEmailRequest,
-    () => {return true},
+    () => {return {success: true}},
     data.invalidBodyMessage
   );
 });
