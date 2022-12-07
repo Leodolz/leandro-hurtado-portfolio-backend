@@ -10,6 +10,7 @@
 // Utilities we need
 const fs = require("fs");
 const path = require("path");
+const rateLimit = require("@fastify/rate-limit");
 
 // Require the fastify framework and instantiate it
 const fastify = require("fastify")({
@@ -17,10 +18,9 @@ const fastify = require("fastify")({
   logger: false,
 });
 
-fastify.register(import("@fastify/rate-limit"), {
-  global: true,
-  max: 10,
-  timeWindow: 1000*30,
+fastify.register(rateLimit, {
+  max: 1,
+  timeWindow: "1 minute",
 });
 
 // Setup our static files
@@ -62,7 +62,7 @@ fastify.get("/", async (request, reply) => {
   Params is the data we pass to the client
   - SEO values for front-end UI but not for raw data
   */
-  let params = request.query.raw ? {} : { seo: seo };
+  let params = {};
 
   // Get the available choices from the database
   const options = await db.getOptions();
@@ -80,9 +80,7 @@ fastify.get("/", async (request, reply) => {
   // ADD PARAMS FROM TODO HERE
 
   // Send the page options or raw JSON data if the client requested it
-  return request.query.raw
-    ? reply.send(params)
-    : reply.view("/src/pages/index.hbs", params);
+  return reply.send(params);
 });
 
 fastify.get("/academicRecords", async (request, reply) => {
@@ -146,10 +144,7 @@ fastify.get(
   "/activities",
   {
     config: {
-      rateLimit: {
-        max: 1,
-        timeWindow: "1 minute",
-      },
+      rateLimit: true
     },
   },
   async (request, reply) => {
