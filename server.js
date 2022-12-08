@@ -257,7 +257,8 @@ fastify.post("/comment", async (request, reply) => {
 });
 
 fastify.post("/email", async (request, reply) => {
-  if(await db.verifyEmailFrequency()) {
+  let existingEmails = await db.verifyEmailFrequency();
+  if(existingEmails) {
     return {
       success: false,
       errorMessage: "Looks like another person sent an email recently! Please wait " +

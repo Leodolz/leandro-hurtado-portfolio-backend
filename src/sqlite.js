@@ -469,8 +469,8 @@ const self = module.exports = {
   },
   
   verifyEmailFrequency: async() => {
-    let existingEmail = await db.get("SELECT id FROM EmailRequests WHERE createdAt > ? ", [Date.now() - 1000 * 300]);
-    return existingEmail !== undefined || existingEmail !== null;
+    let existingEmail = await db.all("SELECT id FROM EmailRequests WHERE createdAt > ? ", [Date.now() - (1000 * 300)]);
+    return existingEmail.length > 0;
   },
   
   processEmailRequest: async(email) => {
