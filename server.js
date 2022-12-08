@@ -17,7 +17,7 @@ const transport = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: portfolioMail,
-    pass: 'paifcqvheenmsegu'
+    pass: 'paifcqvheenmsegu' // Generated password for nodemailer solely
   }
 });
  
@@ -326,49 +326,6 @@ fastify.get("/logs", async (request, reply) => {
   return request.query.raw
     ? reply.send(params)
     : reply.view("/src/pages/admin.hbs", params);
-});
-
-/**
- * Admin endpoint to empty all logs
- *
- * Requires authorization (see setup instructions in README)
- * If auth fails, return a 401 and the log list
- * If auth is successful, empty the history
- */
-fastify.post("/reset", async (request, reply) => {
-  let params = {};
-
-  /* 
-  Authenticate the user request by checking against the env key variable
-  - make sure we have a key in the env and body, and that they match
-  */
-  if (
-    !request.body.key ||
-    request.body.key.length < 1 ||
-    !process.env.ADMIN_KEY ||
-    request.body.key !== process.env.ADMIN_KEY
-  ) {
-    console.error("Auth fail");
-
-    // Auth failed, return the log data plus a failed flag
-    params.failed = "You entered invalid credentials!";
-
-    // Get the log list
-    params.optionHistory = await db.getLogs();
-  } else {
-    // We have a valid key and can clear the log
-    params.optionHistory = await db.clearHistory();
-
-    // Check for errors - method would return false value
-    params.error = params.optionHistory ? null : data.errorMessage;
-  }
-
-  // Send a 401 if auth failed, 200 otherwise
-  const status = params.failed ? 401 : 200;
-  // Send an unauthorized status code if the user credentials failed
-  return request.query.raw
-    ? reply.status(status).send(params)
-    : reply.status(status).view("/src/pages/admin.hbs", params);
 });
 
 // Run the server and report out to the logs
