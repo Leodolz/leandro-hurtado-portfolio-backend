@@ -27,8 +27,11 @@ const fastify = require("fastify")({
   logger: false,
 });
 
+
 fastify.register(require("@fastify/cors"), { 
-  // put your options here
+  origin: (origin, cb) => {
+    cb(null, true);
+  }
 });
 
 // We use a module for handling database operations in /src
@@ -254,6 +257,9 @@ fastify.post("/comment", async (request, reply) => {
 });
 
 fastify.post("/email", async (request, reply) => {
+  console.error("Hello");
+  console.log("Elo");
+  console.log(request.body);
   
   if(await db.verifyEmailFrequency()) {
     return {
@@ -262,6 +268,7 @@ fastify.post("/email", async (request, reply) => {
       "up to 5 minutes to try again!"
     }
   }
+  console.log("What");
   /*
   let contactInfo = "\n\nContact info:\n";
   let extraInfo = false;
