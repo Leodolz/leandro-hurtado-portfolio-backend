@@ -506,6 +506,7 @@ const self = module.exports = {
                 Date.now()
               ]
             );
+        return {success: true, frequent: true};
       } else {
         await db.run(
               "UPDATE Comments SET comment = ?, updatedAt = ? WHERE id = ?",
@@ -515,13 +516,14 @@ const self = module.exports = {
                 existingComment.id
               ]
             );
+        return {success: true, frequent: false};
       }
       
       return null;
       
     } catch (dbError) {
       console.error(dbError);
-      return dbError;
+      return {success:false, errorMessage: dbError};
     }
   },
 

@@ -248,12 +248,7 @@ fastify.post("/hobby", async (request, reply) => {
 
 fastify.post("/comment", async (request, reply) => {
   // We have a vote - send to the db helper to process and return results
-  return await db.processWrapper(
-    request.body,
-    db.processComment,
-    db.getComments,
-    data.invalidBodyMessage
-  );
+  return await db.processComment(request.body);
 });
 
 fastify.post("/email", async (request, reply) => {
