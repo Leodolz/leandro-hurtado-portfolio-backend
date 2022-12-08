@@ -247,20 +247,18 @@ fastify.post("/hobby", async (request, reply) => {
 });
 
 fastify.post("/comment", async (request, reply) => {
-  // We have a vote - send to the db helper to process and return results
   return await db.processComment(request.body);
 });
 
 fastify.post("/email", async (request, reply) => {
   let existingEmails = await db.verifyEmailFrequency();
-  /*if(existingEmails) {
+  if(existingEmails) {
     return {
       success: false,
       errorMessage: "Looks like another person sent an email recently! Please wait " +
       "up to 5 minutes to try again!"
     }
-  }*/
-  console.log(request.body);
+  }
   let contactInfo = "\n\nContact info:\n";
   let extraInfo = false;
   if(request.body.company.length > 0) {
@@ -284,7 +282,7 @@ fastify.post("/email", async (request, reply) => {
     request.body.message + contactInfo,
     cc: request.body.email
   };
-  
+  /*
   transport.sendMail(mailOptions, function(error, info){
     if (error) {
       console.log(error);
@@ -293,7 +291,7 @@ fastify.post("/email", async (request, reply) => {
       console.log('Email sent: ' + info.response);
     }
   });
-  
+  */
   
   return await db.processWrapper(
     request.body,
