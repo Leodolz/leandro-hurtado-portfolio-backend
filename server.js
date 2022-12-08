@@ -20,13 +20,16 @@ const transport = nodemailer.createTransport({
     pass: 'cs601test'
   }
 });
-
+ 
 // Require the fastify framework and instantiate it
 const fastify = require("fastify")({
   // Set this to true for detailed logging:
   logger: false,
 });
 
+fastify.register(require("@fastify/cors"), { 
+  // put your options here
+});
 
 // We use a module for handling database operations in /src
 const data = require("./src/data.json");
