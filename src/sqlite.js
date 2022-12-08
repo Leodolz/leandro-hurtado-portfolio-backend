@@ -253,7 +253,7 @@ const self = module.exports = {
   getComments: async () => {
     // We use a try catch block in case of db errors
     try {
-      return db.all("SELECT fistName, lastName, comment, updatedAt from Comments");
+      return db.all("SELECT firstName, lastName, comment, updatedAt from Comments");
     } catch (dbError) {
       // Database connection error
       console.error(dbError);
