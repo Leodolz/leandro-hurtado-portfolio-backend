@@ -291,9 +291,12 @@ const self = module.exports = {
         }
       }
     }
-    // 
+    // If the body parameter is a single object with parameters, enter this condition
     else if (Object.keys(body).length > 0) {
+      // Process in a similar way as in the loop above, the processing should return null
+      // if there were no errors
       let error = await processAction(body);
+      // If something is delivered, push this error
       if(error !== null) {
         allErrors.push({
           originalBody: body,
@@ -301,44 +304,57 @@ const self = module.exports = {
         });
       }
     } else {
+      // If the body parameter is neither an array or an object, then return the invalidMessage
       return {
         errorMessage: invalidMessage,
         requestBody: body
       };
     }
+    // If there are errors, return these listed with a message
     if(allErrors.length > 0) {
       return {
+        // We use the process count and errors length to inform how many erorrs in the collection happened
         errorMessage: `${allErrors.length} out of ${processCount} record(s) failed upon submission!`,
         errors: allErrors
       };
     }
+    // If nothing wrong happened, return with the get action callback indicating success
     return await getAction();
   },
   
+  // Method for storing image given an ImageRecord
   processImage: async (imageRecord) => {
     const existingImages = await db.all(
         "SELECT * from ImageRecords WHERE source = ?",
         imageRecord.imageSource
       );
-      if (existingImages.length > 0) {
-        return { id: existingImages[0].id }
-      }
-      await db.run("INSERT INTO ImageRecords(source, alt) VALUES (?, ?)", [
-        imageRecord.imageSource,
-        imageRecord.imageAlt]
-      );
-      
-      return await db.get("SELECT id FROM ImageRecords WHERE source= ?", [imageRecord.imageSource]);
+    // Check if there is an image with the same source
+    if (existingImages.length > 0) {
+      // If it exists, return this id instead of creating something
+      return { id: existingImages[0].id }
+    }
+    // Await the database insertion using the source and alt given
+    await db.run("INSERT INTO ImageRecords(source, alt) VALUES (?, ?)", [
+      imageRecord.imageSource,
+      imageRecord.imageAlt]
+    );
+
+    // Return all the images
+    return await db.get("SELECT id FROM ImageRecords WHERE source= ?", [imageRecord.imageSource]);
   },
 
+  // Method to save the academic record in the database
   processAcademicRecord: async (academicRecord) => {
-    // Insert new Log table entry indicating the user choice and timestamp
+    // try catch to handle exceptions
     try {
       
+      // Get the image id either by creation or fetching an existing by source
       let image = await self.processImage(academicRecord);
+      // If this image fetched has an error message, return this error json
       if(image.hasOwnProperty("errorMessage")) {
         return image;
       }
+      // Run insert query with data given
       await db.run(
             "INSERT INTO AcademicRecords (timePeriod, degreeLink, degreeTitle, degreeDescription, institutionImage) VALUES (?, ?, ?, ?, ?)",
             [
@@ -349,20 +365,26 @@ const self = module.exports = {
               image.id,
             ]
           );
+      // Return null, which indicates no errors
       return null;
     } catch (dbError) {
+      // If an error happened, log it and return it
       console.error(dbError);
       return dbError;
     }
   },
   
+  // Method to save a work record in the database
   processWorkRecord: async (workRecord) => {
-    // Insert new Log table entry indicating the user choice and timestamp
+    // Try catch to handle exceptions
     try {
+      // Get the image id either by insertion or fetching an existing one by source
       let image = await self.processImage(workRecord);
+      // If there was an error, return it
       if(image.hasOwnProperty("errorMessage")) {
         return image;
       }
+      // Execute insertion query with data given
       await db.run(
             "INSERT INTO WorkRecords (timePeriod, position, description, companyImage) VALUES (?, ?, ?, ?)",
             [
@@ -372,20 +394,26 @@ const self = module.exports = {
               image.id,
             ]
           );
+      // Return null which means no errors
       return null;
     } catch (dbError) {
+      // If there was an exception, log it and return it to fetcher
       console.error(dbError);
       return dbError;
     }
   },
   
+  // Method to save a hobby in the database
   processHobbyRecord: async (hobby) => {
-    // Insert new Log table entry indicating the user choice and timestamp
+    // Try catch for handling exceptions
     try {
+      // Get the image id either by insertion or fetching and existing one with the same source
       let image = await self.processImage(hobby);
+      // If the image retrieval contained an error, return it
       if(image.hasOwnProperty("errorMessage")) {
         return image;
       }
+      // Make insertion of hobby with data given
       await db.run(
             "INSERT INTO Hobbies (title, description, hobbyImage) VALUES (?, ?, ?)",
             [
@@ -394,18 +422,23 @@ const self = module.exports = {
               image.id,
             ]
           );
+      // Return null as no errors happened
       return null;
       
     } catch (dbError) {
+      // If an exception happened, log it and return it
       console.error(dbError);
       return dbError;
     }
   },
   
+  // Method for inserting a social item in the database
   processSocialItem: async (socialItem) => {
-    // Insert new Log table entry indicating the user choice and timestamp
+    // Try catch for handling exceptions
     try {
+      // Get the image either by insertion or by fetching an existing image with same source
       let image = await self.processImage(socialItem);
+      // If image retrieval had error, return it
       if(image.hasOwnProperty("errorMessage")) {
         return image;
       }
@@ -503,42 +536,6 @@ const self = module.exports = {
     } catch (dbError) {
       console.error(dbError);
       return {success:false, errorMessage: dbError};
-    }
-  },
-
-  /**
-   * Get logs
-   *
-   * Return choice and time fields from all records in the Log table
-   */
-  getLogs: async () => {
-    // Return most recent 20
-    try {
-      // Return the array of log entries to admin page
-      return await db.all("SELECT * from Log ORDER BY time DESC LIMIT 20");
-    } catch (dbError) {
-      console.error(dbError);
-    }
-  },
-
-  /**
-   * Clear logs and reset votes
-   *
-   * Destroy everything in Log table
-   * Reset votes in Choices table to zero
-   */
-  clearHistory: async () => {
-    try {
-      // Delete the logs
-      await db.run("DELETE from Log");
-
-      // Reset the vote numbers
-      await db.run("UPDATE Choices SET picks = 0");
-
-      // Return empty array
-      return [];
-    } catch (dbError) {
-      console.error(dbError);
     }
   },
 };
