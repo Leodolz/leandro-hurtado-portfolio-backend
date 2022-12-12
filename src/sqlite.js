@@ -138,7 +138,7 @@ const self = module.exports = {
   getWorkRecords: async () => {
     // We use a try catch block in case of db errors
     try {
-      // Select all records
+      // Select all work records
       let records = await db.all("SELECT * from WorkRecords");
       // As we map these records with async arrow functions, we need to
       // use Promise.all for awaiting all of these to be mapped for returning
@@ -165,7 +165,10 @@ const self = module.exports = {
   getAcademicRecords: async () => {
     // We use a try catch block in case of db errors
     try {
+      // Select all academic records
       let records = await db.all("SELECT * from AcademicRecords");
+      // Map all items for returning in a certain structure while also fetching
+      // their respective image, this is done similarly as in the work records
       return await Promise.all(records.map(async (record) => {
         let image = await self.getImage(record.institutionImage);
         return {
@@ -179,16 +182,20 @@ const self = module.exports = {
         }
       }));
     } catch (dbError) {
-      // Database connection error
+      // Database connection error logging and return if it happens
       console.error(dbError);
       return dbError;
     }
   },
   
+  // Async method for fetching all hobbies
   getHobbies: async () => {
     // We use a try catch block in case of db errors
     try {
+      // Select all hobbies
       let records = await db.all("SELECT * from Hobbies");
+      // Map all items for returning in a certain structure while also fetching
+      // their respective image, this is done similarly as in the work records
       return await Promise.all(records.map(async (record) => {
         let image = await self.getImage(record.hobbyImage);
         return {
@@ -198,16 +205,20 @@ const self = module.exports = {
         }
       }));
     } catch (dbError) {
-      // Database connection error
+      // Database connection error logging anr return if it happens
       console.error(dbError);
       return dbError;
     }
   },
   
+  // Async method for fetching social items from database
   getSocialItems: async () => {
     // We use a try catch block in case of db errors
     try {
+      // Get all social items from table
       let records = await db.all("SELECT * from SocialItems");
+      // Map all items for returning in a certain structure while also fetching
+      // their respective image, this is done similarly as in the work records
       return await Promise.all(records.map(async (record) => {
         let image = await self.getImage(record.socialImage);
         return {
@@ -217,42 +228,62 @@ const self = module.exports = {
         }
       }));
     } catch (dbError) {
-      // Database connection error
+      // Database connection error logging and return if it happens
       console.error(dbError);
       return dbError;
     }
   },
   
+  // Async method for fetching activities from database
   getActivities: async () => {
     // We use a try catch block in case of db errors
     try {
+      // Return the retrieval of activities, we only need title and description
+      // fields for each
       return db.all("SELECT title, description from Activities");
     } catch (dbError) {
-      // Database connection error
+      // Database connection error logging and return if it happens
       console.error(dbError);
       return dbError;
     }
   },
   
+  // Async method for fetching comments from database
   getComments: async () => {
     // We use a try catch block in case of db errors
     try {
+      // Return retrieval of comments and select certain fields for each record
       return db.all("SELECT firstName, lastName, comment, updatedAt from Comments");
     } catch (dbError) {
-      // Database connection error
+      // Database connection error logging and return if it happens
       console.error(dbError);
       return dbError;
     }
   },
   
+  // Wrapper function that will generically process working with its given parameters
+  // The "body" parameter is the one that will be processed by the second parameter
+  // The "processAction" parameter is a callback function for processing the body in the db
+  // The "getAction" parameter is a callback function for returning a set of items as response
+  // The "invalidMessage" parameter will be returned as backup if something bad happens on processing
   processWrapper: async (body, processAction, getAction, invalidMessage) => {
+    // Initialize errors as empty array
     const allErrors = [];
+    // Start the process count variable, it indicates the number of processes
+    // that should be done as this method either runs one or multiple processes
     let processCount = 1;
+    // If the body is an array, enter this condition
     if(Array.isArray(body)) {
+      // Process count will be transformed to the number of items in the array
       processCount = body.length;
+      // Iterate on each record from the array in ES6 style
       for(const singleRecord of body) {
+        // Process using the record, if something is delivered, it would be an error
         let error = await processAction(singleRecord);
+        // Check if we indeed received something different than null as error
         if(error !== null) {
+          // If there is an error, append in the allErrors array the error and continue
+          // with further iterations
           allErrors.push({
             originalBody: singleRecord,
             error
@@ -260,6 +291,7 @@ const self = module.exports = {
         }
       }
     }
+    // 
     else if (Object.keys(body).length > 0) {
       let error = await processAction(body);
       if(error !== null) {
