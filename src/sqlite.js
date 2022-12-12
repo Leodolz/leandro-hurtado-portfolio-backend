@@ -30,21 +30,9 @@ dbWrapper
     try {
       // The async / await syntax lets us write the db operations in a way that won't block the app
       if (!exists) {
-        // Database doesn't exist yet - create Choices and Log tables
-        await db.run(
-          "CREATE TABLE Choices (id INTEGER PRIMARY KEY AUTOINCREMENT, language TEXT, picks INTEGER)"
-        );
+        // Database doesn't exist yet - create necessary tables
 
-        // Add default choices to table
-        await db.run(
-          "INSERT INTO Choices (language, picks) VALUES ('HTML', 0), ('JavaScript', 0), ('CSS', 0)"
-        );
-
-        // Log can start empty - we'll insert a new record whenever the user chooses a poll option
-        await db.run(
-          "CREATE TABLE Log (id INTEGER PRIMARY KEY AUTOINCREMENT, choice TEXT, time STRING)"
-        );
-
+        // Create table for Image Records using SQL commands
         await db.run(
           "CREATE TABLE ImageRecords (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -53,6 +41,7 @@ dbWrapper
             ")"
         );
         
+        // Create table for Activities using SQL commands
         await db.run(
           "CREATE TABLE Activities (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -61,6 +50,7 @@ dbWrapper
             ")"
         );
 
+        // Create table for Hobbies using SQL commands
         await db.run(
           "CREATE TABLE Hobbies (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -71,6 +61,7 @@ dbWrapper
             ")"
         );
 
+        // Create table for Social Items using SQL commands
         await db.run(
           "CREATE TABLE SocialItems (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -81,6 +72,7 @@ dbWrapper
             ")"
         );
 
+        // Create table for Academic Records using SQL commands
         await db.run(
           "CREATE TABLE AcademicRecords (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -93,6 +85,7 @@ dbWrapper
             ")"
         );
 
+        // Create table for Work Records using SQL commands
         await db.run(
           "CREATE TABLE WorkRecords (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -104,6 +97,7 @@ dbWrapper
             ")"
         );
         
+        // Create table for Comment Records using SQL commands
         await db.run(
           "CREATE TABLE Comments (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -115,6 +109,7 @@ dbWrapper
             ")"
         );
         
+        // Create table for Email request Records using SQL commands
         await db.run(
           "CREATE TABLE EmailRequests (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -124,6 +119,7 @@ dbWrapper
         );
         
       }
+      // If any db error happens, log it here
     } catch (dbError) {
       console.error(dbError);
     }
@@ -131,23 +127,10 @@ dbWrapper
 
 // Our server script will call these methods to connect to the db
 const self = module.exports = {
-  /**
-   * Get the options in the database
-   *
-   * Return everything in the Choices table
-   * Throw an error in case of db connection issues
-   */
-  getOptions: async () => {
-    // We use a try catch block in case of db errors
-    try {
-      return await db.all("SELECT * from Choices");
-    } catch (dbError) {
-      // Database connection error
-      console.error(dbError);
-    }
-  },
   
+  // Async method for fetching an image from its id
   getImage: async(imageId) => {
+    // We use db.get() and create an SQL and the rest of parameters will replace the ""
     return await db.get("SELECT source, alt from ImageRecords WHERE id = ?", [imageId]);
   },
   

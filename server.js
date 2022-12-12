@@ -3,8 +3,7 @@
  * The script uses the database helper in /src
  * The endpoints retrieve, update, and return data to the page handlebars files
  *
- * The API returns the front-end UI handlebars pages, or
- * Raw json if the client requests it with a query parameter ?raw=json
+ * The API returns responses as json
  */
 
 // Utilities we need
@@ -13,11 +12,14 @@ const path = require("path");
 const nodemailer = require("nodemailer");
 const portfolioMail = 'leandro.hurtado.portfolio@gmail.com';
 
+// Create the config for nodemailer
 const transport = nodemailer.createTransport({
+  // Service that will be used with nodemailer
   service: 'gmail',
   auth: {
+    // Authentication credentials for email. These are only for this app
     user: portfolioMail,
-    pass: 'paifcqvheenmsegu' // Generated password for nodemailer solely
+    pass: process.env.PORTFOLIO_MAIL_PASS // Generated password for nodemailer solely
   }
 });
  
@@ -276,30 +278,40 @@ fastify.post("/email", async (request, reply) => {
     to: "leodolz14@gmail.com",
     // The subject is specified in the request's body
     subject: request.body.subject,
-    // 
+    // The message is prepended by a hard-coded header
     text: `This is a message sent from Portfolio website, this message was sent by: ` +
     `${request.body.firstName} ${request.body.lastName}. Content is shown below:\n` +
+    // The message from the request is given alongside with contact info if given extra info
     request.body.message + contactInfo,
+    // The requestor is cc'd so that when I receive the email, I can reply to the interested in contact
     cc: request.body.email
   };
+  // Nodemailer method for sending the email, we use the email options built above
+  // and we use a callback function in the case any error happened
   transport.sendMail(mailOptions, function(error, info){
     if (error) {
+      // If there was any error, print it
       console.log(error);
       return {success: false, errorMessage: error};
     } else {
+      // If the email sent was a success log in here
       console.log('Email sent: ' + info.response);
     }
   });
   
+  // After sending the email, save the succesful email request in a similar way we
+  // processed POST requests for the DB
   return await db.processWrapper(
     request.body,
     db.processEmailRequest,
+    // Notice this arrow function instead of using a db get function, this is because
+    // we don't need to send anything to the requester rather than a success flag
     () => {return {success: true}},
     data.invalidBodyMessage
   );
 });
 
-// Run the server and report out to the logs
+// Run the server
 fastify.listen(
   { port: process.env.PORT, host: "0.0.0.0" },
   function (err, address) {
