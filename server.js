@@ -88,11 +88,10 @@ fastify.get("/workRecords", async (request, reply) => {
 
 // Method for GET requests on hobbies
 fastify.get("/hobbies", async (request, reply) => {
-  // Initialize response object
+  // Initialize response
   let params = {};
-
   // Get the available hobbies from database
-  const records = await db.getHobbies();
+  let records = await db.getHobbies();
   // If records were fetched, set these as response
   if (records) {
     params = records;
