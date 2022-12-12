@@ -30,7 +30,7 @@ const fastify = require("fastify")({
 
 fastify.register(require("@fastify/cors"), { 
   origin: (origin, cb) => {
-    if(origin === 'http://localhost:8080') {
+    if(origin === 'http://localhost:8080' || origin === 'https://leandro-hurtado-portfolio-api.glitch.me') {
       cb(null, true);
     }
   }
@@ -40,91 +40,64 @@ fastify.register(require("@fastify/cors"), {
 const data = require("./src/data.json");
 const db = require("./src/" + data.database);
 
-/**
- * Home route for the app
- *
- * Return the poll options from the database helper script
- * The home route may be called on remix in which case the db needs setup
- *
- * Client can request raw data using a query parameter
- */
+// Home route for the app. delivers a simple json with meta information
 fastify.get("/", async (request, reply) => {
-  /* 
-  Params is the data we pass to the client
-  - SEO values for front-end UI but not for raw data
-  */
-  let params = {};
-
-  // Get the available choices from the database
-  const options = await db.getOptions();
-  if (options) {
-    params.optionNames = options.map((choice) => choice.language);
-    params.optionCounts = options.map((choice) => choice.picks);
-  }
-  // Let the user know if there was a db error
-  else params.error = data.errorMessage;
-
-  // Check in case the data is empty or not setup yet
-  if (options && params.optionNames.length < 1)
-    params.setup = data.setupMessage;
-
-  // ADD PARAMS FROM TODO HERE
-
-  // Send the page options or raw JSON data if the client requested it
-  return reply.send(params);
+  return reply.send({
+    app : 'Leandro Portfolio backend',
+    version: '1.0.0',
+  });
 });
 
+// GET request for academic records, should deliver a json array as response
 fastify.get("/academicRecords", async (request, reply) => {
-  /* 
-  Params is the data we pass to the client
-  - SEO values for front-end UI but not for raw data
-  */
   let params = {};
 
-  // Get the available choices from the database
+  // Get the available academic records from the database
   const records = await db.getAcademicRecords();
+  // If there are records, are not null and have length, we send these
   if (records) {
     params = records;
   }
-  // Let the user know if there was a db error
-  else params.error = data.errorMessage;
+  // Let the user know if there was a db error if no records ere presented
+  else  {
+    params.error = data.errorMessage;
+  }
 
-  // Send the page options or raw JSON data if the client requested it
+  // Send the records or object with error message
   return reply.send(params);
 });
 
+// Method for GET request for work records
 fastify.get("/workRecords", async (request, reply) => {
-  /* 
-  Params is the data we pass to the client
-  - SEO values for front-end UI but not for raw data
-  */
   let params = {};
 
-  // Get the available choices from the database
+  // Get the work records
   const records = await db.getWorkRecords();
+  // If there are records fetched, deliver these records
   if (records) {
     params = records;
   }
   // Let the user know if there was a db error
-  else params.error = data.errorMessage;
+  else {
+    params.error = data.errorMessage;
+  }
 
-  // Send the page options or raw JSON data if the client requested it
+  // Send the fetched records or error message
   return reply.send(params);
 });
 
+// Method for GET requests on hobbies
 fastify.get("/hobbies", async (request, reply) => {
-  /* 
-  Params is the data we pass to the client
-  - SEO values for front-end UI but not for raw data
-  */
+  // Initialize response object
   let params = {};
 
-  // Get the available choices from the database
+  // Get the available hobbies from database
   const records = await db.getHobbies();
+  // If records were fetched, set these as response
   if (records) {
     params = records;
   }
-  // Let the user know if there was a db error
+  // Let the user know if there was a db error in the 
   else params.error = data.errorMessage;
 
   // Send the page options or raw JSON data if the client requested it
