@@ -1,7 +1,7 @@
 {
-  "name": "hello-sqlite",
-  "version": "0.1.0",
-  "description": "A Node app with SQLite database, instantly up and running.",
+  "name": "leandro-portfolio-backend",
+  "version": "1.0.0",
+  "description": "A Node app with SQLite database, instantly up and running to act as backend for portfolio app.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

@@ -442,6 +442,7 @@ const self = module.exports = {
       if(image.hasOwnProperty("errorMessage")) {
         return image;
       }
+      // Execute insertion SQL query with data given
       await db.run(
             "INSERT INTO SocialItems (title, linkPage, socialImage) VALUES (?, ?, ?)",
             [
@@ -450,16 +451,20 @@ const self = module.exports = {
               image.id,
             ]
           );
+      // Return null as no errors happened
       return null;
     } catch (dbError) {
+      // If there is an exception log it and return it
       console.error(dbError);
       return dbError;
     }
   },
   
+  // Method to store an activity in the database
   processActivity: async (thingToDoItem) => {
-    // Insert new Log table entry indicating the user choice and timestamp
+    // Try catch for exception handling
     try {
+      // Execute insertion for activity with title and description
       await db.run(
             "INSERT INTO Activities (title, description) VALUES (?, ?)",
             [
@@ -468,25 +473,36 @@ const self = module.exports = {
             ]
           );
       
+      // Return null as no exceptions happened
       return null;
       
     } catch (dbError) {
+      // If exception happens, log it and return it
       console.error(dbError);
       return dbError;
     }
   },
   
+  // Fetch a single comment by email
   getComment: async(email) => {
+    // SQL query execution for fetching a comment from a certain email
     return await db.get("SELECT id FROM Comments WHERE email= ?", [email]);
   },
   
+  // Verify that the email request should be 5 minutes away from now
   verifyEmailFrequency: async() => {
+    // SQL query for getting any email where the createdAt was less than 5 minutes from now. 1000 means the conversion from milliseconds to seconds
+    // And 300 are the seconds which mean 5 minutes
     let existingEmail = await db.all("SELECT id FROM EmailRequests WHERE createdAt > ? ", [Date.now() - (1000 * 300)]);
+    // Return a flag that indicates if there are existing emails or not
     return existingEmail.length > 0;
   },
   
+  // Process an email request insertion
   processEmailRequest: async(email) => {
+    // Try catch for handling exceptions
     try {
+      // SQL query for inserting email with current time
       await db.run(
             "INSERT INTO EmailRequests (email, createdAt) VALUES (?, ?)",
             [
@@ -495,19 +511,25 @@ const self = module.exports = {
             ]
           );
       
+      // Return null as no exceptions happened
       return null;
       
     } catch (dbError) {
+      // If an exception happened, return it
       console.error(dbError);
       return dbError;
     }
   },
   
+  // Method to save or update a comment from the database
   processComment: async (comment) => {
-    // Insert new Log table entry indicating the user choice and timestamp
+    // Try catch for handling errors
     try {
+      // Fetch if there is an existing comment from an email
       let existingComment = await self.getComment(comment.email);
+      // If the comment is undefined then no comment with current email were done
       if(existingComment === undefined) {
+        // SQL query for inserting comment with the parameter data
         await db.run(
               "INSERT INTO Comments (firstName, lastName, email, comment, updatedAt) VALUES (?, ?, ?, ?, ?)",
               [
@@ -518,8 +540,10 @@ const self = module.exports = {
                 Date.now()
               ]
             );
+        // Return success and a flag that indicates if the comment was not updated, but rather inserted
         return {success: true, frequent: false};
       } else {
+        // If the comment already exists, execute SQL update query with data
         await db.run(
               "UPDATE Comments SET comment = ?, updatedAt = ? WHERE id = ?",
               [
@@ -528,12 +552,11 @@ const self = module.exports = {
                 existingComment.id
               ]
             );
+        // Return success and a flag that indicates that the comment was updated
         return {success: true, frequent: true};
       }
-      
-      return null;
-      
     } catch (dbError) {
+      // If an exception happens, log it and return unsucessful response
       console.error(dbError);
       return {success:false, errorMessage: dbError};
     }
