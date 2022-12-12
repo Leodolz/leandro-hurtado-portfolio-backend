@@ -30,7 +30,9 @@ const fastify = require("fastify")({
 
 fastify.register(require("@fastify/cors"), { 
   origin: (origin, cb) => {
-    cb(null, true);
+    if(origin === 'http://localhost:8080') {
+      cb(null, true);
+    }
   }
 });
 
@@ -282,7 +284,6 @@ fastify.post("/email", async (request, reply) => {
     request.body.message + contactInfo,
     cc: request.body.email
   };
-  /*
   transport.sendMail(mailOptions, function(error, info){
     if (error) {
       console.log(error);
@@ -291,7 +292,6 @@ fastify.post("/email", async (request, reply) => {
       console.log('Email sent: ' + info.response);
     }
   });
-  */
   
   return await db.processWrapper(
     request.body,
@@ -299,26 +299,6 @@ fastify.post("/email", async (request, reply) => {
     () => {return {success: true}},
     data.invalidBodyMessage
   );
-});
-
-/**
- * Admin endpoint returns log of votes
- *
- * Send raw json or the admin handlebars page
- */
-fastify.get("/logs", async (request, reply) => {
-  let params = {};
-
-  // Get the log history from the db
-  params.optionHistory = await db.getLogs();
-
-  // Let the user know if there's an error
-  params.error = params.optionHistory ? null : data.errorMessage;
-
-  // Send the log list
-  return request.query.raw
-    ? reply.send(params)
-    : reply.view("/src/pages/admin.hbs", params);
 });
 
 // Run the server and report out to the logs
