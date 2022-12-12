@@ -130,16 +130,23 @@ const self = module.exports = {
   
   // Async method for fetching an image from its id
   getImage: async(imageId) => {
-    // We use db.get() and create an SQL and the rest of parameters will replace the ""
+    // We use db.get() and create an SQL and the rest of parameters will replace the "?" characters on the SQL command
     return await db.get("SELECT source, alt from ImageRecords WHERE id = ?", [imageId]);
   },
   
+  // Async method for fetching all work records
   getWorkRecords: async () => {
     // We use a try catch block in case of db errors
     try {
+      // Select all records
       let records = await db.all("SELECT * from WorkRecords");
+      // As we map these records with async arrow functions, we need to
+      // use Promise.all for awaiting all of these to be mapped for returning
       return await Promise.all(records.map(async (record) => {
+        // Get the image for the work record using the companyImage attribute
+        // Which is the id of the work record
         let image = await self.getImage(record.companyImage);
+        // Return the record as json for each item in this map function
         return {
           image: image,
           timePeriod: record.timePeriod,
@@ -154,6 +161,7 @@ const self = module.exports = {
     }
   },
   
+  // Async method for fetching all academic records
   getAcademicRecords: async () => {
     // We use a try catch block in case of db errors
     try {
