@@ -166,7 +166,7 @@ fastify.get("/comments", async (request, reply) => {
   return reply.send(params);
 });
 
-// POST request handler for processing accademig records
+// POST request handler for processing accademig records and save them in the database
 fastify.post("/academicRecord", async (request, reply) => {
   // We call our process wrapper, our request body is the record or records array
   // The callback function to process it in database is the second argument
@@ -180,7 +180,7 @@ fastify.post("/academicRecord", async (request, reply) => {
   );
 });
 
-// POST request handler for processing work records
+// POST request handler for processing work records and save them in the database
 fastify.post("/workRecord", async (request, reply) => {
   // We call our process wrapper, our request body is the work record or records array
   // The arguments given follow the same pattern as the academic record method's comments explain
@@ -192,9 +192,9 @@ fastify.post("/workRecord", async (request, reply) => {
   );
 });
 
-// POST request handler for processing social items
+// POST request handler for processing social items and save them in the database
 fastify.post("/socialItem", async (request, reply) => {
-  // We have a vote - send to the db helper to process a
+  // We call our process wrapper, our request body is the social item or items array
   // The arguments given follow the same pattern as the academic record method's comments explain
   return await db.processWrapper(
     request.body,
@@ -204,8 +204,10 @@ fastify.post("/socialItem", async (request, reply) => {
   );
 });
 
+// POST request handler for processing activities and saving them in the database
 fastify.post("/activity", async (request, reply) => {
-  // We have a vote - send to the db helper to process and return results
+  // We call our process wrapper, our request body is the activity or activities array
+  // The arguments given follow the same pattern as the academic record method's comments explain
   return await db.processWrapper(
     request.body,
     db.processActivity,
@@ -214,8 +216,10 @@ fastify.post("/activity", async (request, reply) => {
   );
 });
 
+// POST request handler for processing hobbies and saving them in the database
 fastify.post("/hobby", async (request, reply) => {
-  // We have a vote - send to the db helper to process and return results
+  // We call our process wrapper, our request body is the hobby or hobbies array
+  // The arguments given follow the same pattern as the academic record method's comments explain
   return await db.processWrapper(
     request.body,
     db.processHobbyRecord,
@@ -224,12 +228,17 @@ fastify.post("/hobby", async (request, reply) => {
   );
 });
 
+// POST request handler for processing comments and saving them in the database
 fastify.post("/comment", async (request, reply) => {
+  // We call our processComment from DB where the body is a comment
   return await db.processComment(request.body);
 });
 
+// POST request for processing email contacting message built from the contact me section
 fastify.post("/email", async (request, reply) => {
+  // Verify if there are mails that were used in a certain amount of time
   let existingEmails = await db.verifyEmailFrequency();
+  // If there were mails sent recently, don't go further and tell the user to wait
   if(existingEmails) {
     return {
       success: false,
@@ -237,24 +246,37 @@ fastify.post("/email", async (request, reply) => {
       "up to 5 minutes to try again!"
     }
   }
+  // Initialize contact info
   let contactInfo = "\n\nContact info:\n";
+  // Initialize a flag that indicates extra information given
   let extraInfo = false;
+  // Check if company name is given on the request
   if(request.body.company.length > 0) {
+    // If there is a company name, we append it to the contact info
     contactInfo += `Company: ${request.body.company}\n`; 
+    // We set the extra info flag to true
     extraInfo = true;
   }
+  // Check if a phone number is given
   if(request.body.phone.length > 0) {
+    // If there is phone number, we append the country and phone info inside our contact info
     contactInfo += `Country: ${request.body.country}\nPhone: ${request.body.phone}`;
+    // We set the extra info flag to true
     extraInfo = true;
   }
+  // If there was no extra info given, then empty contact information
   if(!extraInfo) {
     contactInfo = "";
   }
-  // We have a vote - send to the db helper to process and return results
+  // Create the email options for usage with nodemailer
   const mailOptions = {
+    // The sender is the email created solely for portfolio contact me processing
     from: portfolioMail,
+    // The receiver is my email
     to: "leodolz14@gmail.com",
+    // The subject is specified in the request's body
     subject: request.body.subject,
+    // 
     text: `This is a message sent from Portfolio website, this message was sent by: ` +
     `${request.body.firstName} ${request.body.lastName}. Content is shown below:\n` +
     request.body.message + contactInfo,
