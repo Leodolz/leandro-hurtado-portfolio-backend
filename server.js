@@ -103,75 +103,75 @@ fastify.get("/hobbies", async (request, reply) => {
   return reply.send(params);
 });
 
+// Method for GET requests on activities
 fastify.get(
   "/activities",
   async (request, reply) => {
-    /* 
-  Params is the data we pass to the client
-  - SEO values for front-end UI but not for raw data
-  */
+    // Initialize response
     let params = {};
 
-    // Get the available choices from the database
+    // Get the activities saved from database
     const records = await db.getActivities();
+    // If there are records fetched, set these as response
     if (records) {
       params = records;
     }
     // Let the user know if there was a db error
-    else params.error = data.errorMessage;
+    else {
+      params.error = data.errorMessage;
+    }
 
-    // Send the page options or raw JSON data if the client requested it
+    // Send the response either if it was an error or the activities fetched
     return reply.send(params);
   }
 );
 
+// Method for GET request on social items
 fastify.get("/socialItems", async (request, reply) => {
-  /* 
-  Params is the data we pass to the client
-  - SEO values for front-end UI but not for raw data
-  */
+  // Initialize response
   let params = {};
 
-  // Get the available choices from the database
+  // Get the social items from database
   const records = await db.getSocialItems();
+  // If there were records fetched, set these as response
   if (records) {
     params = records;
   }
   // Let the user know if there was a db error
-  else params.error = data.errorMessage;
+  else {
+    params.error = data.errorMessage;
+  }
 
-  // Send the page options or raw JSON data if the client requested it
+  // Send the response
   return reply.send(params);
 });
 
+// Method for GET requests for comments
 fastify.get("/comments", async (request, reply) => {
-  /* 
-  Params is the data we pass to the client
-  - SEO values for front-end UI but not for raw data
-  */
+  // Initialize response
   let params = {};
 
-  // Get the available choices from the database
+  // Get the available comments from the database
   const records = await db.getComments();
+  // If there are records from database, set these as response
   if (records) {
     params = records;
   }
   // Let the user know if there was a db error
-  else params.error = data.errorMessage;
+  else {
+    params.error = data.errorMessage;
+  }
 
-  // Send the page options or raw JSON data if the client requested it
+  // Send the response
   return reply.send(params);
 });
 
-/**
- * Post route to process user vote
- *
- * Retrieve vote from body data
- * Send vote to database helper
- * Return updated list of votes
- */
+// POST request handler for processing accademig records
 fastify.post("/academicRecord", async (request, reply) => {
-  // We have a vote - send to the db helper to process and return results
+  // We call our process wrapper, our request body is the record or records array
+  // The callback function to process it in database is the second argument
+  // The callback function to return all the academic records so far is the third argument
+  // The error message is the last argument
   return await db.processWrapper(
     request.body,
     db.processAcademicRecord,
@@ -180,8 +180,10 @@ fastify.post("/academicRecord", async (request, reply) => {
   );
 });
 
+// POST request handler for processing work records
 fastify.post("/workRecord", async (request, reply) => {
-  // We have a vote - send to the db helper to process and return results
+  // We call our process wrapper, our request body is the work record or records array
+  // The arguments given follow the same pattern as the academic record method's comments explain
   return await db.processWrapper(
     request.body,
     db.processWorkRecord,
@@ -190,8 +192,10 @@ fastify.post("/workRecord", async (request, reply) => {
   );
 });
 
+// POST request handler for processing social items
 fastify.post("/socialItem", async (request, reply) => {
-  // We have a vote - send to the db helper to process and return re
+  // We have a vote - send to the db helper to process a
+  // The arguments given follow the same pattern as the academic record method's comments explain
   return await db.processWrapper(
     request.body,
     db.processSocialItem,
