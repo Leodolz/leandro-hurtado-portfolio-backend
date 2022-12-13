@@ -30,9 +30,10 @@ const fastify = require("fastify")({
 });
 
 
+// Allow cors for specific frontend
 fastify.register(require("@fastify/cors"), { 
   origin: (origin, cb) => {
-    if(origin === 'http://localhost:8080' || origin === 'https://leandro-hurtado-portfolio-api.glitch.me') {
+    if(origin === 'https://leandro-hurtado-portfolio.netlify.app') {
       cb(null, true);
     }
   }
